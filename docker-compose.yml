@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: donkedin-app
+    working_dir: /app
+    build:
+      context: .
+    volumes:
+      - ./:/app:cached
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - NEO4J_URI=bolt://donkedin-neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASS=neo4jpassword
+      - REDIS_URL=redis://redis:6379
+    command: sh -c "npm install && npm run dev -- --hostname 0.0.0.0"
+    depends_on:
+      - neo4j
+      - redis
+
+  neo4j:
+    image: neo4j:5
+    container_name: donkedin-neo4j
+    restart: unless-stopped
+    environment:
+      - NEO4J_AUTH=neo4j/neo4jpassword
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: donkedin-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  neo4j_data: {}
+  redis_data: {}

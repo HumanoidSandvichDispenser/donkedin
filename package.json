@@ -1,0 +1,29 @@
+{
+  "name": "donkedin-tf",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "cytoscape": "^3.23.2",
+    "ioredis": "^5.2.4",
+    "neo4j-driver": "^5.11.0",
+    "neogma": "^1.15.2",
+    "nuxt": "^4.2.2",
+    "vue": "^3.5.26",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.26.0",
+    "@types/node": "^25.0.3",
+    "morpheus4j": "^4.5.2",
+    "nuxt-scheduler": "^0.1.9",
+    "vitest": "^4.0.16"
+  }
+}
