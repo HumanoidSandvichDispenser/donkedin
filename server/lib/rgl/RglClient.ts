@@ -23,7 +23,7 @@ export class RglClient {
     HttpRequest: HttpRequestConstructor = FetchHttpRequest,
   ) {
     this.request = new HttpRequest({
-      BASE: config?.BASE ?? "",
+      BASE: config?.BASE ?? "https://api.rgl.gg",
       VERSION: config?.VERSION ?? "0.1.0",
       WITH_CREDENTIALS: config?.WITH_CREDENTIALS ?? false,
       CREDENTIALS: config?.CREDENTIALS ?? "include",
