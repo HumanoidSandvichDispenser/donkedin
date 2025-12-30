@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "cytoscape": "^3.23.2",
+    "cytoscape-cola": "^2.5.1",
+    "cytoscape-fcose": "^2.2.0",
     "ioredis": "^5.2.4",
     "neo4j-driver": "^5.11.0",
     "neogma": "^1.15.2",

@@ -1,30 +1,48 @@
 <template>
   <div>
     <div class="controls">
-      <button class="btn" @click="centerFirst">Center First Node</button>
+      <div class="search-controls">
+        <input
+          class="input"
+          v-model="source"
+          placeholder="source (rgl:alias, etf2l:alias, or steamid64)"
+        />
+        <input
+          class="input"
+          v-model="dest"
+          placeholder="destination (optional)"
+        />
+        <button class="btn" @click="handleLoad">Load</button>
+        <button class="btn" @click="centerFirst">Center First Node</button>
+      </div>
     </div>
     <div ref="container" class="graph-container"></div>
-    <div class="legend">
-      <span class="dot player" /> Player <span class="dot rgl" /> RGL Team
-      <span class="dot etf2l" /> ETF2L Team
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import cytoscape from "cytoscape";
+import cola from "cytoscape-cola";
+import fcose from "cytoscape-fcose";
+
+cytoscape.use(cola);
+cytoscape.use(fcose);
 
 const props = defineProps<{ initialGraph?: { nodes: any[]; links: any[] } }>();
 
 const container = ref<HTMLDivElement | null>(null);
 let cy: cytoscape.Core | null = null;
+let liveLayout: any = null;
 
 const nuxt = useNuxtApp();
-const fetcher = (url: string) =>
-  $fetch(url).catch((e: any) => {
+const fetcher = (url: string, opts: any = {}) =>
+  $fetch(url, opts).catch((e: any) => {
     throw e;
   });
+
+const source = ref("");
+const dest = ref("");
 
 function makeNodeId(n: any) {
   if (!n) return "";
@@ -104,11 +122,148 @@ async function expandNodeById(origId: string, type: string) {
     }
 
     if (cy) {
-      const layout = cy.layout({ name: "cose", animate: true });
+      const layout = cy.layout({
+        name: "fcose",
+        animate: true,
+        animationDuration: 250,
+      });
       layout.run();
     }
+
   } catch (err) {
     console.error("Expand node failed", err);
+  }
+}
+
+async function handleLoad() {
+  if (!source.value) return;
+
+  // clear existing graph
+  if (cy) {
+    cy.elements().remove();
+  }
+
+  // Always add source node
+  if (!dest.value) {
+    const raw = source.value.trim();
+    if (/^\d+$/.test(raw)) {
+      try {
+        const res: any = await fetcher(`/api/player/${raw}`);
+        if (res?.found) {
+          const playerNode = {
+            id: res.player.id,
+            name: res.player.rglName || res.player.etf2lName || res.player.id,
+            type: "player",
+          };
+          addNodeIfMissing(playerNode);
+          const teams = res.teams || {};
+          for (const t of teams.rgl || []) {
+            const teamNode = { id: t.teamId, name: t.teamName, type: "rgl" };
+            addNodeIfMissing(teamNode);
+            addEdgeIfMissing(playerNode, teamNode, 1);
+          }
+          for (const t of teams.etf2l || []) {
+            const teamNode = { id: t.id, name: t.name, type: "etf2l" };
+            addNodeIfMissing(teamNode);
+            addEdgeIfMissing(playerNode, teamNode, 1);
+          }
+        } else {
+          addNodeIfMissing({ id: raw, name: raw, type: "player" });
+        }
+      } catch (e) {
+        console.error("Load source failed", e);
+        addNodeIfMissing({ id: raw, name: raw, type: "player" });
+      }
+    } else {
+      addNodeIfMissing({ id: raw, name: raw, type: "player" });
+    }
+
+    return;
+  }
+
+  // dest provided: call path API to get nodes and segments
+  try {
+    const params = new URLSearchParams();
+    params.set("a", source.value.trim());
+    params.set("b", dest.value.trim());
+    const res: any = await fetcher(`/api/player/path?${params.toString()}`);
+    if (!res?.found || !Array.isArray(res.nodes)) return;
+
+    // add nodes
+    for (const n of res.nodes) {
+      let type = "player";
+      if (n.labels && Array.isArray(n.labels)) {
+        if (n.labels.includes("RglTeam")) {
+          type = "rgl";
+        } else if (n.labels.includes("Etf2lTeam")) {
+          type = "etf2l";
+        } else if (n.labels.includes("Player")) {
+          type = "player";
+        }
+      }
+
+      const node = {
+        id: n.properties?.id ?? n.id,
+        name:
+          n.properties?.rglName ??
+          n.properties?.etf2lName ??
+          n.properties?.name ??
+          n.properties?.label ??
+          String(n.id),
+        type,
+      };
+      addNodeIfMissing(node);
+    }
+
+    // add edges from segments
+    if (Array.isArray(res.segments)) {
+      for (const s of res.segments) {
+        const start = s.start;
+        const end = s.end;
+        const startType = (start.labels || []).includes("RglTeam")
+          ? "rgl"
+          : (start.labels || []).includes("Etf2lTeam")
+            ? "etf2l"
+            : "player";
+        const endType = (end.labels || []).includes("RglTeam")
+          ? "rgl"
+          : (end.labels || []).includes("Etf2lTeam")
+            ? "etf2l"
+            : "player";
+        const startNode = {
+          id: start.properties?.id ?? start.id,
+          name:
+            start.properties?.rglName ??
+            start.properties?.etf2lName ??
+            start.properties?.name ??
+            String(start.id),
+          type: startType,
+        };
+        const endNode = {
+          id: end.properties?.id ?? end.id,
+          name:
+            end.properties?.rglName ??
+            end.properties?.etf2lName ??
+            end.properties?.name ??
+            String(end.id),
+          type: endType,
+        };
+        addNodeIfMissing(startNode);
+        addNodeIfMissing(endNode);
+        addEdgeIfMissing(startNode, endNode, 1);
+      }
+    }
+
+    if (cy) {
+      const layout = cy.layout({
+        name: "fcose",
+        animate: true,
+        animationDuration: 250,
+      });
+      layout.run();
+    }
+  } catch (e) {
+    console.error("Path load failed", e);
   }
 }
 
@@ -141,17 +296,22 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
     },
     style: [
       {
-        selector: 'node',
+        selector: "node",
         style: {
-          "font-size": 8,
+          "font-size": 5,
           "text-valign": "center",
           "text-halign": "center",
+          "font-family": "Inter",
+          "font-weight": 600,
+          "max-width": "100%",
+          "overflow": "hidden",
+          "text-overflow": "ellipsis",
         },
       },
       {
         selector: 'node[type="player"]',
         style: {
-          "background-color": "#3366ff",
+          "background-color": "#373737",
           label: "data(label)",
           color: "#fff",
           width: 30,
@@ -180,7 +340,7 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
       },
       { selector: "edge", style: { width: 2, "line-color": "#999" } },
     ],
-    layout: { name: "cose" },
+    layout: { name: "fcose" },
   });
 
   cy.on("tap", "node", (evt) => {
@@ -188,22 +348,6 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
     const origId = node.data("origId");
     const type = node.data("type");
     expandNodeById(String(origId), type);
-  });
-
-  cy.on("dragfree", "node", (evt) => {
-    const node = evt.target;
-    const neighborhood = node.closedNeighborhood();
-    const layout = neighborhood.layout({
-
-      name: "cose",
-
-      animate: true,
-      animationDuration: 400,
-      fit: false,
-      randomize: false,
-      gravity: 0.25,
-      idealEdgeLength: 50,
-    })
   });
 }
 
@@ -256,33 +400,5 @@ onBeforeUnmount(() => {
   padding: 6px 10px;
   border-radius: 4px;
   cursor: pointer;
-}
-
-.legend {
-  margin-top: 8px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  font-size: 14px;
-}
-
-.dot {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 6px;
-}
-
-.dot.player {
-  background: #3366ff;
-}
-
-.dot.rgl {
-  background: #ff6633;
-}
-
-.dot.etf2l {
-  background: #33cc66;
 }
 </style>
