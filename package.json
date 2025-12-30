@@ -16,6 +16,7 @@
     "neo4j-driver": "^5.11.0",
     "neogma": "^1.15.2",
     "nuxt": "^4.2.2",
+    "vite-tsconfig-paths": "^6.0.3",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4"
   },

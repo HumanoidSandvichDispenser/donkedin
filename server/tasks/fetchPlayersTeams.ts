@@ -8,5 +8,5 @@ export default defineTask({
     return {
       result: "OK",
     };
-  }
-})
+  },
+});

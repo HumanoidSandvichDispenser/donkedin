@@ -13,8 +13,6 @@
           </li>
         </ul>
       </div>
-
-      <!--GraphViewer :graph="graph" /-->
     </div>
   </div>
 </template>

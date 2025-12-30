@@ -7,7 +7,4 @@ export default defineNuxtConfig({
       tasks: true,
     },
   },
-  alias: {
-    "@": ".",
-  },
 });
