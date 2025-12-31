@@ -11,8 +11,8 @@
       <div v-else class="placeholder-avatar">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="64"
-          height="64"
+          width="48"
+          height="48"
           fill="var(--muted)"
           viewBox="0 0 24 24"
         >
@@ -25,19 +25,7 @@
     <div class="card-content">
       <div class="name">{{ person.name || person.id }}</div>
       <div class="aliases">
-        <div v-if="person.rglName" class="alias rgl">
-          <a
-            :href="`https://rgl.gg/Public/PlayerProfile?p={person.id}`"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            RGL: {{ person.rglName }}
-          </a>
-        </div>
-        <div v-if="person.etf2lName" class="alias etf2l">
-          ETF2L: {{ person.etf2lName }}
-        </div>
-        <div class="alias steam">
+        <span class="alias steam">
           <a
             :href="`https://steamcommunity.com/profiles/${person.id}`"
             target="_blank"
@@ -45,7 +33,19 @@
           >
           Steam
           </a>
-        </div>
+        </span>
+        <span v-if="person.rglName" class="alias rgl">
+          <a
+            :href="`https://rgl.gg/Public/PlayerProfile?p=${person.id}`"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            RGL/{{ person.rglName }}
+          </a>
+        </span>
+        <span v-if="person.etf2lName" class="alias etf2l">
+          ETF2L/{{ person.etf2lName }}
+        </span>
       </div>
     </div>
     <div class="card-body">

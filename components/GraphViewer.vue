@@ -207,7 +207,7 @@ function centerFirst() {
   if (!nodes || nodes.length === 0) return;
   const first = nodes[0];
   try {
-    cy.animate({ fit: { eles: first, padding: 80 } }, { duration: 450 });
+    cy.animate({ fit: { eles: first, padding: 400 } }, { duration: 450 });
   } catch (err) {
     // fallback to immediate fit
     cy.fit(first, 80);
