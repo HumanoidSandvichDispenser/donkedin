@@ -67,8 +67,10 @@ export default defineEventHandler(async (event) => {
     const tgtKey = b.prop;
 
     const cypher = `MATCH (source:Player {${srcKey}: $a}), (target:Player {${tgtKey}: $b})
-      MATCH p = shortestPath((source)-[:MEMBER_OF*]-(target))
-      WHERE ALL(n IN nodes(p) WHERE NOT (n:RglTeam AND n.name CONTAINS \"Free Agent\"))
+      MATCH p = shortestPath(
+        (source)-[*..20]-(target)
+      )
+      WHERE NONE(n IN nodes(p) WHERE (n:RglTeam AND n.tag = \"FA\"))
       RETURN p, nodes(p) as nodes`;
 
     const res = await session.executeRead((tx) => tx.run(cypher, { a: a.value, b: b.value }));
