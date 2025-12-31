@@ -5,8 +5,8 @@
         v-if="person.avatarUrl"
         :src="person.avatarUrl"
         :alt="person.name || person.id"
-        width="64"
-        height="64"
+        width="48"
+        height="48"
       />
       <div v-else class="placeholder-avatar">
         <svg
@@ -73,9 +73,9 @@ const props = defineProps<{
   padding: 12px;
   border-radius: 8px;
   background-color: var(--surface-2);
-  margin-bottom: 8px;
   flex-direction: row;
   width: 100%;
+  gap: 12px;
 }
 
 .teammate-card a {
@@ -101,6 +101,7 @@ const props = defineProps<{
 }
 
 .aliases {
+  gap: 8px;
   width: 100%;
   font-size: 12px;
 }

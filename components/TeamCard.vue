@@ -1,23 +1,29 @@
 <template>
-  <div class="team-card subtle">
-    <div class="league">
-      <span v-if="team?.type" class="tag" :type="team.type">
-        {{ team.type.toUpperCase() }}
-      </span>
-      <span v-if="team?.seasonName" class="muted-text">
-        {{ team.seasonName }}
-      </span>
+  <div class="outer-container">
+    <div class="line">
     </div>
-    <div class="team-name">
-      {{ team?.name }}
-      <span v-if="team?.tag" class="tag-name">
-        ({{ team?.tag }})
-      </span>
-    </div>
-    <div v-if="team?.divisionName">
-      <span class="muted-text">
-        {{ team.divisionName }}
-      </span>
+    <div class="inner-container">
+      <div class="team-card subtle">
+        <div class="league">
+          <span v-if="team?.type" class="tag" :type="team.type">
+            {{ team.type.toUpperCase() }}
+          </span>
+          <span v-if="team?.seasonName" class="muted-text">
+            {{ team.seasonName }}
+          </span>
+        </div>
+        <div class="team-name">
+          {{ team?.name }}
+          <span v-if="team?.tag" class="tag-name">
+            ({{ team?.tag }})
+          </span>
+        </div>
+        <div v-if="team?.divisionName">
+          <span class="muted-text">
+            {{ team.divisionName }}
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -35,13 +41,32 @@ const props = defineProps<{
 </script>
 
 <style scoped>
+.outer-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.line {
+  width: 1px;
+  margin-left: 36px;
+  margin-right: 12px;
+  height: 100%;
+  background-color: var(--muted);
+}
+
+.inner-container {
+  flex: 1;
+  padding: 12px;
+}
+
 .team-card.subtle {
   font-family: "Inter", sans-serif;
-  width: 200px;
   padding: 10px;
   border: none;
   background-color: var(--bg);
-  border: 1px solid var(--muted);
+  /*border: 1px solid var(--muted);*/
   border-radius: 8px;
   color: var(--text);
   font-size: 13px;

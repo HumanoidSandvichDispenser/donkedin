@@ -4,6 +4,7 @@ import { RglClient } from "~~/server/lib/rgl/RglClient";
 import { Etf2lClient } from "~~/server/lib/etf2l/Etf2lClient";
 import { needsFetch } from "~~/server/utils/needsFetch";
 import { fetchEtf2lExternalData, fetchRglExternalData } from "~~/server/utils/fetchLeagues";
+import { fetchAvatarUrl } from "~~/server/utils/fetchAvatarUrl";
 import type { PlayerProfile, TeamSummary } from "~~/server/utils/fetchLeagues";
 
 const rglClient = new RglClient();
@@ -16,12 +17,14 @@ async function upsertPlayerData(
   data: {
     rglProfile: PlayerProfile | null;
     etf2lProfile: PlayerProfile | null;
+    avatarUrl?: string | null;
   },
 ) {
   const writeQuery = `
     MERGE (p:Player {id: $id})
     SET p.rglName = coalesce($rglName, p.rglName),
         p.etf2lName = coalesce($etf2lName, p.etf2lName),
+        p.avatarUrl = coalesce($avatarUrl, p.avatarUrl),
         p.lastUpdated = datetime()
     WITH p
     UNWIND $rglTeams AS rt
@@ -36,18 +39,13 @@ async function upsertPlayerData(
     RETURN p
   `;
 
-  const rglName = data.rglProfile ? data.rglProfile.name : null;
-  const etf2lName = data.etf2lProfile ? data.etf2lProfile.name : null;
-
-  const rglTeams: TeamSummary[] = data.rglProfile ? (data.rglProfile.teams ?? []) : [];
-  const etf2lTeams: TeamSummary[] = data.etf2lProfile ? (data.etf2lProfile.teams ?? []) : [];
-
   const params: any = {
     id,
-    rglName,
-    etf2lName,
-    rglTeams,
-    etf2lTeams,
+    rglName: data.rglProfile?.name ?? null,
+    etf2lName: data.etf2lProfile?.name ?? null,
+    rglTeams: data.rglProfile?.teams ?? [],
+    etf2lTeams: data.etf2lProfile?.teams ?? [],
+    avatarUrl: data.avatarUrl,
   };
 
   await session.executeWrite((tx) => tx.run(writeQuery, params));
@@ -127,20 +125,21 @@ export default defineEventHandler(async (event) => {
     const shouldFetch = await needsFetch(session, "Player", id, 3, "id");
 
     if (shouldFetch) {
-      //const rglProfile = fetchRglExternalData(rglClient, id);
-      //const etf2lProfile = fetchEtf2lExternalData(etf2lClient, id);
-      const [rglProfile, etf2lProfile] = await Promise.allSettled([
+      const [rglProfile, etf2lProfile, avatarUrl] = await Promise.allSettled([
         fetchRglExternalData(rglClient, id),
         fetchEtf2lExternalData(etf2lClient, id),
+        fetchAvatarUrl(id),
       ]);
 
       const rglProfileVal = rglProfile.status == "fulfilled" ? rglProfile.value : null;
       const etf2lProfileVal = etf2lProfile.status == "fulfilled" ? etf2lProfile.value : null;
+      const avatarUrlVal = avatarUrl.status == "fulfilled" ? avatarUrl.value : null;
       if (rglProfileVal || etf2lProfileVal) {
         // upsert fetched data
         await upsertPlayerData(session, id, {
           rglProfile: rglProfileVal,
           etf2lProfile: etf2lProfileVal,
+          avatarUrl: avatarUrlVal,
         });
       }
     }

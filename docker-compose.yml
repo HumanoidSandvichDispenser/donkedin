@@ -18,6 +18,7 @@ services:
       - NEO4J_USER=neo4j
       - NEO4J_PASS=neo4jpassword
       - REDIS_URL=redis://redis:6379
+      - STEAM_API_KEY=95C1DCD9971F8F436A312FAC1F606DCA
     command: sh -c "npm install && npm run dev -- --hostname 0.0.0.0"
     depends_on:
       - neo4j

@@ -78,6 +78,7 @@ function mapPlayer(n: any) {
       String(n.id),
     rglName: props.rglName,
     etf2lName: props.etf2lName,
+    avatarUrl: props.avatarUrl,
     raw: n,
   };
 }
@@ -179,7 +180,7 @@ function teamBetween(prevIdx: number, currIdx: number) {
 
 <style scoped>
 .path-sidebar {
-  width: 320px;
+  width: 400px;
   max-height: calc(100vh - 40px);
   overflow-y: auto;
   border-left: 1px solid var(--muted);
@@ -196,37 +197,18 @@ function teamBetween(prevIdx: number, currIdx: number) {
   padding: 8px 0;
 }
 
-/* central vertical line */
-.flow::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 36px;
-  bottom: 16px;
-  width: 2px;
-  background: var(--muted);
-  z-index: 0;
-}
-
 .flow-item {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
   z-index: 1;
-  margin-bottom: 12px;
 }
 
 .player-box,
 .team-box {
-  width: 260px;
+  width: 320px;
   display: flex;
   justify-content: center;
-}
-
-.team-box {
-  margin-top: 6px;
 }
 </style>

@@ -63,7 +63,8 @@ watch(() => graph.pathInfo, (v) => {
 }
 
 body {
-  font-family: "Noto Serif", serif;
+  /*font-family: "Noto Serif", serif;*/
+  font-family: "Inter", sans-serif;
   background-color: var(--bg);
   color: var(--text);
 }
