@@ -179,6 +179,10 @@ function teamBetween(prevIdx: number, currIdx: number) {
 </script>
 
 <style scoped>
+h3 {
+  margin: 20px 40px;
+}
+
 .path-sidebar {
   width: 400px;
   max-height: calc(100vh - 40px);

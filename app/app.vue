@@ -73,4 +73,83 @@ a {
   color: var(--accent);
   text-decoration: none;
 }
+
+/* Buttons */
+button, .btn {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--muted);
+  background: var(--surface-0);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+button:hover, .btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.03);
+}
+
+button:active, .btn:active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+
+button:focus-visible, .btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 6px rgba(135,192,149,0.16), 0 8px 20px rgba(0,0,0,0.55);
+}
+
+/* Secondary / ghost buttons */
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: none;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  opacity: 0.95;
+}
+
+/* Inputs, selects, textareas */
+input, textarea, select {
+  background: var(--surface-0);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 0.25rem 1rem;
+  border-radius: 8px;
+  transition: box-shadow 160ms ease, border-color 120ms ease, transform 120ms ease;
+  outline: none;
+  min-height: 2.2rem;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--muted-text);
+  opacity: 0.95;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 6px rgba(135,192,149,0.12);
+  transform: translateY(-1px);
+}
+
+/* subtle focus for keyboard users */
+/*:focus:not(:focus-visible) { box-shadow: none; }*/
+
+/* make forms look tidy */
+.form-row { display:flex; gap:0.5rem; align-items:center; }
+
+/* small utility */
+.small { font-size: 0.9rem; color: var(--muted-text); }
 </style>

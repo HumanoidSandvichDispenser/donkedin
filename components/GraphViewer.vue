@@ -5,7 +5,7 @@
         <input
           class="input"
           v-model="source"
-          placeholder="source (rgl:alias, etf2l:alias, or steamid64)"
+          placeholder="source (steamid64, rgl:alias, etf2l:alias)"
         />
         <input
           class="input"
@@ -232,6 +232,12 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.search-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .graph-viewer {
   height: 100%;
 }
@@ -250,10 +256,6 @@ onBeforeUnmount(() => {
 }
 
 .btn {
-  background: #fff;
-  border: 1px solid #ddd;
-  padding: 6px 10px;
-  border-radius: 4px;
   cursor: pointer;
 }
 </style>
