@@ -1,21 +1,22 @@
 <template>
-  <div>
-    <h1>Graph Viewer</h1>
-    <GraphViewer :initialGraph="graph" />
+  <div class="page-root">
+    <div class="main">
+      <GraphViewer :initialGraph="graph" />
+    </div>
+    <PathSidebar />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import GraphViewer from '@@/components/GraphViewer.vue';
+import PathSidebar from '@@/components/PathSidebar.vue';
 
 const graph = ref({ nodes: [], links: [] });
 
 onMounted(async () => {
   try {
     // seed graph with some popular players or sample
-    // For demo, empty - user can expand by clicking nodes after adding them via search/URL
-    // Could fetch a seed player to show initial content
     const res = await $fetch('/api/player/76561198936168937')
       .catch(() => null);
 
@@ -33,3 +34,16 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+.page-root {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  padding: 12px;
+  height: 100vh;
+}
+</style>

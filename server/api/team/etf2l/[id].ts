@@ -10,7 +10,7 @@ const etf2l = new Etf2lClient({ BASE: "https://api-v2.etf2l.org" });
 async function upsertEtf2lTeam(session: neo4j.Session, team: TeamProfile) {
   const q = `
     MERGE (t:Etf2lTeam {id: $id})
-    SET t.name = $name, t.lastUpdated = datetime()
+    SET t.name = $name, t.tag = $tag, t.lastUpdated = datetime()
     WITH t
     UNWIND $players AS p
       MERGE (pl:Player {id: p.id})
@@ -22,6 +22,7 @@ async function upsertEtf2lTeam(session: neo4j.Session, team: TeamProfile) {
   const params = {
     id: team.teamId,
     name: team.teamName ?? null,
+    tag: team.teamTag,
     players: Array.isArray(team.players)
       ? team.players.map((p) => ({ id: p.steamId, name: p.name }))
       : [],
@@ -41,7 +42,9 @@ async function readEtf2lTeam(session: neo4j.Session, id: Number) {
 
   const tNode = teamRes.records[0].get("t");
   const teamOut: any = {
-    id: neo4j.isInt(tNode.properties.id) ? (tNode.properties.id as neo4j.Integer).toNumber() : tNode.properties.id,
+    id: neo4j.isInt(tNode.properties.id)
+      ? (tNode.properties.id as neo4j.Integer).toNumber()
+      : tNode.properties.id,
     name: tNode.properties.name ?? null,
     lastUpdated: tNode.properties.lastUpdated ?? null,
   };
@@ -55,7 +58,9 @@ async function readEtf2lTeam(session: neo4j.Session, id: Number) {
   const players = playersRes.records.map((r) => {
     const pl = r.get("pl");
     return {
-      id: neo4j.isInt(pl.properties.id) ? (pl.properties.id as neo4j.Integer).toNumber() : pl.properties.id,
+      id: neo4j.isInt(pl.properties.id)
+        ? (pl.properties.id as neo4j.Integer).toNumber()
+        : pl.properties.id,
       name: pl.properties.etf2lName ?? pl.properties.rglName ?? null,
     };
   });
@@ -64,9 +69,14 @@ async function readEtf2lTeam(session: neo4j.Session, id: Number) {
 }
 
 export default defineEventHandler(async (event) => {
-  const { id } = event.context.params as { id: string };
+  const { id, force } = event.context.params as {
+    id: string;
+    force: boolean | undefined;
+  };
 
-  if (!id) return createError({ statusCode: 400, statusMessage: "Missing id" });
+  if (!id) {
+    return createError({ statusCode: 400, statusMessage: "Missing id" });
+  }
 
   const driver = getDriver();
   const session = driver.session();

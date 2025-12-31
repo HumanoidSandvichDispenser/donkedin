@@ -46,5 +46,17 @@ export interface RglTeam {
 
   name: string;
 
+  divisionName: string;
+
   players: RglTeamPlayer[];
+}
+
+export interface RglSeason {
+  name: string;
+
+  formatName: string;
+
+  regionName: string;
+
+  maps: string[];
 }

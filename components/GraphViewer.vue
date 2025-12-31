@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="graph-viewer">
     <div class="controls">
       <div class="search-controls">
         <input
@@ -25,6 +25,7 @@ import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import cytoscape from "cytoscape";
 import cola from "cytoscape-cola";
 import fcose from "cytoscape-fcose";
+import { useGraphStore } from "@/stores/graph";
 
 cytoscape.use(cola);
 cytoscape.use(fcose);
@@ -35,11 +36,7 @@ const container = ref<HTMLDivElement | null>(null);
 let cy: cytoscape.Core | null = null;
 let liveLayout: any = null;
 
-const nuxt = useNuxtApp();
-const fetcher = (url: string, opts: any = {}) =>
-  $fetch(url, opts).catch((e: any) => {
-    throw e;
-  });
+const graph = useGraphStore();
 
 const source = ref("");
 const dest = ref("");
@@ -50,220 +47,57 @@ function makeNodeId(n: any) {
   return `player:${n.id}`;
 }
 
-function addNodeIfMissing(node: any) {
+function syncStoreToCy() {
   if (!cy) return;
-  const id = makeNodeId(node);
-  if (cy.$id(id).length === 0) {
-    cy.add({
-      data: {
-        id,
-        label: node.name || node.id,
-        origId: node.id,
-        type: node.type || "player",
-      },
-    });
+
+  // add any missing nodes from store
+  for (const n of graph.nodes) {
+    const id = makeNodeId(n);
+    if (cy.$id(id).length === 0) {
+      cy.add({ data: { id, label: n.name || n.id, origId: n.id, type: n.type || 'player' } });
+    }
+  }
+
+  // add any missing edges from store
+  for (const e of graph.links) {
+    if (cy.$id(e.id).length === 0) {
+      cy.add({ data: { id: e.id, source: e.source, target: e.target, weight: e.weight ?? 1 } });
+    }
   }
 }
 
-function addEdgeIfMissing(source: any, target: any, weight = 1) {
+function clearCy() {
   if (!cy) return;
-  const sid = makeNodeId(source);
-  const tid = makeNodeId(target);
-  const edgeId = `e:${sid}->${tid}`;
-  if (cy.$id(edgeId).length === 0) {
-    cy.add({ data: { id: edgeId, source: sid, target: tid, weight } });
-  }
-}
-
-async function expandNodeById(origId: string, type: string) {
-  try {
-    if (type === "player") {
-      const res: any = await fetcher(`/api/player/${origId}`);
-      if (!res?.found) return;
-      const playerNode = {
-        id: res.player.id,
-        name: res.player.rglName || res.player.etf2lName || res.player.id,
-        type: "player",
-      };
-      addNodeIfMissing(playerNode);
-      const teams = res.teams || {};
-      for (const t of teams.rgl || []) {
-        const teamNode = { id: t.teamId, name: t.teamName, type: "rgl" };
-        addNodeIfMissing(teamNode);
-        addEdgeIfMissing(playerNode, teamNode, 1);
-      }
-      for (const t of teams.etf2l || []) {
-        const teamNode = { id: t.id, name: t.name, type: "etf2l" };
-        addNodeIfMissing(teamNode);
-        addEdgeIfMissing(playerNode, teamNode, 1);
-      }
-    } else if (type === "rgl") {
-      const res: any = await fetcher(`/api/team/rgl/${origId}`);
-      if (!res?.found) return;
-      const team = res.team;
-      const teamNode = { id: team.id, name: team.name, type: "rgl" };
-      addNodeIfMissing(teamNode);
-      for (const p of res.players || []) {
-        const playerNode = { id: p.id, name: p.name, type: "player" };
-        addNodeIfMissing(playerNode);
-        addEdgeIfMissing(playerNode, teamNode, 1);
-      }
-    } else if (type === "etf2l") {
-      const res: any = await fetcher(`/api/team/etf2l/${origId}`);
-      if (!res?.found) return;
-      const team = res.team;
-      const teamNode = { id: team.id, name: team.name, type: "etf2l" };
-      addNodeIfMissing(teamNode);
-      for (const p of res.players || []) {
-        const playerNode = { id: p.id, name: p.name, type: "player" };
-        addNodeIfMissing(playerNode);
-        addEdgeIfMissing(playerNode, teamNode, 1);
-      }
-    }
-
-    if (cy) {
-      const layout = cy.layout({
-        name: "fcose",
-        animate: true,
-        animationDuration: 250,
-      });
-      layout.run();
-    }
-
-  } catch (err) {
-    console.error("Expand node failed", err);
-  }
+  cy.elements().remove();
 }
 
 async function handleLoad() {
   if (!source.value) return;
 
   // clear existing graph
-  if (cy) {
-    cy.elements().remove();
-  }
+  clearCy();
+  graph.clear();
 
   // Always add source node
   if (!dest.value) {
-    const raw = source.value.trim();
-    if (/^\d+$/.test(raw)) {
-      try {
-        const res: any = await fetcher(`/api/player/${raw}`);
-        if (res?.found) {
-          const playerNode = {
-            id: res.player.id,
-            name: res.player.rglName || res.player.etf2lName || res.player.id,
-            type: "player",
-          };
-          addNodeIfMissing(playerNode);
-          const teams = res.teams || {};
-          for (const t of teams.rgl || []) {
-            const teamNode = { id: t.teamId, name: t.teamName, type: "rgl" };
-            addNodeIfMissing(teamNode);
-            addEdgeIfMissing(playerNode, teamNode, 1);
-          }
-          for (const t of teams.etf2l || []) {
-            const teamNode = { id: t.id, name: t.name, type: "etf2l" };
-            addNodeIfMissing(teamNode);
-            addEdgeIfMissing(playerNode, teamNode, 1);
-          }
-        } else {
-          addNodeIfMissing({ id: raw, name: raw, type: "player" });
-        }
-      } catch (e) {
-        console.error("Load source failed", e);
-        addNodeIfMissing({ id: raw, name: raw, type: "player" });
-      }
-    } else {
-      addNodeIfMissing({ id: raw, name: raw, type: "player" });
-    }
-
+    await graph.loadSourceOnly(source.value);
+    syncStoreToCy();
     return;
   }
 
   // dest provided: call path API to get nodes and segments
-  try {
-    const params = new URLSearchParams();
-    params.set("a", source.value.trim());
-    params.set("b", dest.value.trim());
-    const res: any = await fetcher(`/api/player/path?${params.toString()}`);
-    if (!res?.found || !Array.isArray(res.nodes)) return;
+  await graph.loadPath(source.value, dest.value);
+  syncStoreToCy();
 
-    // add nodes
-    for (const n of res.nodes) {
-      let type = "player";
-      if (n.labels && Array.isArray(n.labels)) {
-        if (n.labels.includes("RglTeam")) {
-          type = "rgl";
-        } else if (n.labels.includes("Etf2lTeam")) {
-          type = "etf2l";
-        } else if (n.labels.includes("Player")) {
-          type = "player";
-        }
-      }
-
-      const node = {
-        id: n.properties?.id ?? n.id,
-        name:
-          n.properties?.rglName ??
-          n.properties?.etf2lName ??
-          n.properties?.name ??
-          n.properties?.label ??
-          String(n.id),
-        type,
-      };
-      addNodeIfMissing(node);
-    }
-
-    // add edges from segments
-    if (Array.isArray(res.segments)) {
-      for (const s of res.segments) {
-        const start = s.start;
-        const end = s.end;
-        const startType = (start.labels || []).includes("RglTeam")
-          ? "rgl"
-          : (start.labels || []).includes("Etf2lTeam")
-            ? "etf2l"
-            : "player";
-        const endType = (end.labels || []).includes("RglTeam")
-          ? "rgl"
-          : (end.labels || []).includes("Etf2lTeam")
-            ? "etf2l"
-            : "player";
-        const startNode = {
-          id: start.properties?.id ?? start.id,
-          name:
-            start.properties?.rglName ??
-            start.properties?.etf2lName ??
-            start.properties?.name ??
-            String(start.id),
-          type: startType,
-        };
-        const endNode = {
-          id: end.properties?.id ?? end.id,
-          name:
-            end.properties?.rglName ??
-            end.properties?.etf2lName ??
-            end.properties?.name ??
-            String(end.id),
-          type: endType,
-        };
-        addNodeIfMissing(startNode);
-        addNodeIfMissing(endNode);
-        addEdgeIfMissing(startNode, endNode, 1);
-      }
-    }
-
-    if (cy) {
-      const layout = cy.layout({
-        name: "fcose",
-        animate: true,
-        animationDuration: 250,
-      });
-      layout.run();
-    }
-  } catch (e) {
-    console.error("Path load failed", e);
+  if (cy) {
+    const layout = cy.layout({
+      name: 'fcose',
+      animate: true,
+      animationDuration: 250,
+      animationEasing: "ease-in",
+      fit: true,
+    });
+    layout.run();
   }
 }
 
@@ -282,7 +116,7 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
           id: makeNodeId(n),
           label: n.name || n.id,
           origId: n.id,
-          type: n.type || "player",
+          type: n.type || 'player',
         },
       })),
       edges: (initial?.links || []).map((l: any, i: number) => ({
@@ -296,24 +130,24 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
     },
     style: [
       {
-        selector: "node",
+        selector: 'node',
         style: {
-          "font-size": 5,
-          "text-valign": "center",
-          "text-halign": "center",
-          "font-family": "Inter",
-          "font-weight": 600,
-          "max-width": "100%",
-          "overflow": "hidden",
-          "text-overflow": "ellipsis",
+          'font-size': 5,
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'font-family': 'Inter',
+          'font-weight': 600,
+          'max-width': '100%',
+          'overflow': 'hidden',
+          'text-overflow': 'ellipsis',
         },
       },
       {
         selector: 'node[type="player"]',
         style: {
-          "background-color": "#373737",
-          label: "data(label)",
-          color: "#fff",
+          'background-color': '#5b5b5b',
+          label: 'data(label)',
+          color: '#fff',
           width: 30,
           height: 30,
         },
@@ -321,9 +155,9 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
       {
         selector: 'node[type="rgl"]',
         style: {
-          "background-color": "#ff6633",
-          label: "data(label)",
-          color: "#fff",
+          'background-color': '#e39b7b',
+          label: 'data(label)',
+          color: '#fff',
           width: 28,
           height: 28,
         },
@@ -331,23 +165,39 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
       {
         selector: 'node[type="etf2l"]',
         style: {
-          "background-color": "#33cc66",
-          label: "data(label)",
-          color: "#fff",
+          'background-color': '#89beba',
+          label: 'data(label)',
+          color: '#fff',
           width: 28,
           height: 28,
         },
       },
-      { selector: "edge", style: { width: 2, "line-color": "#999" } },
+      { selector: 'edge', style: { width: 1, 'line-color': '#383135' } },
     ],
-    layout: { name: "fcose" },
+    layout: { name: 'fcose', animationEasing: "ease-in" },
   });
 
-  cy.on("tap", "node", (evt) => {
+  // react to store changes by syncing
+  watch(() => graph.nodes.slice(), () => syncStoreToCy());
+  watch(() => graph.links.slice(), () => {
+    syncStoreToCy();
+    if (cy) {
+      cy
+        .layout({
+          name: 'fcose',
+          animate: true,
+          animationDuration: 250,
+          animationEasing: "ease-in",
+        })
+        .run();
+    }
+  });
+
+  cy.on('tap', 'node', (evt) => {
     const node = evt.target;
-    const origId = node.data("origId");
-    const type = node.data("type");
-    expandNodeById(String(origId), type);
+    const origId = node.data('origId');
+    const type = node.data('type');
+    graph.expandNodeById(String(origId), type);
   });
 }
 
@@ -382,16 +232,21 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.graph-viewer {
+  height: 100%;
+}
+
 .graph-container {
-  width: 100%;
-  height: 600px;
-  border: 1px solid #ddd;
+  flex: 1 1 auto;
+  height: 100%;
+  border: 1px solid var(--muted);
+  background-color: var(--surface-0);
 }
 
 .controls {
-  position: absolute;
+  position: relative;
   z-index: 10;
-  margin: 12px;
+  margin: 12px 0 12px 0;
 }
 
 .btn {

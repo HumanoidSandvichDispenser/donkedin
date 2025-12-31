@@ -67,7 +67,7 @@ export default defineEventHandler(async (event) => {
     const tgtKey = b.prop;
 
     const cypher = `MATCH (source:Player {${srcKey}: $a}), (target:Player {${tgtKey}: $b})
-      MATCH p = shortestPath((source)-[*]-(target))
+      MATCH p = shortestPath((source)-[:MEMBER_OF*]-(target))
       WHERE ALL(n IN nodes(p) WHERE NOT (n:RglTeam AND n.name CONTAINS \"Free Agent\"))
       RETURN p, nodes(p) as nodes`;
 

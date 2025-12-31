@@ -1,12 +1,14 @@
-import { getDriver } from "@@/server/utils/neo4j";
+import { getDriver } from "~~/server/utils/neo4j";
 import neo4j from "neo4j-driver";
-import { RglClient } from "@@/server/lib/rgl/RglClient";
-import { needsFetch } from "@@/server/utils/needsFetch";
+import { RglClient } from "~~/server/lib/rgl/RglClient";
+import type { RglTeam, RglSeason } from "~~/server/lib/rgl/types";
+import { needsFetch } from "~~/server/utils/needsFetch";
+import { fetchRglSeason } from "~~/server/utils/fetchRglSeason";
 
 const rglClient = new RglClient({ BASE: "https://api.rgl.gg" });
 
 // Upsert RGL team data and players
-async function upsertRglTeam(session: neo4j.Session, team: any) {
+async function upsertRglTeam(session: neo4j.Session, team: RglTeam, season: RglSeason) {
   const q = `
     MERGE (t:RglTeam {id: $id})
     SET t.name = $name, t.tag = $tag, t.lastUpdated = datetime()
@@ -15,19 +17,26 @@ async function upsertRglTeam(session: neo4j.Session, team: any) {
       MERGE (pl:Player {id: p.steamId})
       SET pl.rglName = coalesce(p.name, pl.rglName)
       MERGE (pl)-[:MEMBER_OF]->(t)
+    SET
+      t.seasonid = $seasonId,
+      t.seasonName = $seasonName,
+      t.formatName = $formatName,
+      t.divisionName = $divisionName
     RETURN t
   `;
 
   const params = {
-    id: team.teamId ?? team.id,
-    name: team.name ?? team.teamName ?? null,
-    tag: team.tag ?? null,
-    players: Array.isArray(team.players)
-      ? team.players.map((p: any) => ({
-          steamId: p.steamId ?? p.steam?.id64 ?? null,
-          name: p.name,
-        }))
-      : [],
+    id: team.teamId,
+    name: team.name,
+    tag: team.tag,
+    players: team.players.map((p) => ({
+        steamId: p.steamId,
+        name: p.name,
+      })),
+    seasonId: team.seasonId,
+    seasonName: season.name,
+    formatName: season.formatName,
+    divisionName: team.divisionName,
   };
 
   await session.executeWrite((tx) => tx.run(q, params));
@@ -73,7 +82,9 @@ async function readRglTeam(session: neo4j.Session, id: Number) {
 export default defineEventHandler(async (event) => {
   const { id } = event.context.params as { id: string };
 
-  if (!id) return createError({ statusCode: 400, statusMessage: "Missing id" });
+  if (!id) {
+    return createError({ statusCode: 400, statusMessage: "Missing id" });
+  }
 
   const driver = getDriver();
   const session = driver.session();
@@ -84,7 +95,10 @@ export default defineEventHandler(async (event) => {
     if (shouldFetch) {
       const team = await rglClient.teams.getV0Teams(Number(id));
       if (team) {
-        await upsertRglTeam(session, team);
+        const season = await fetchRglSeason(rglClient, team.seasonId);
+        if (season) {
+          await upsertRglTeam(session, team, season);
+        }
       }
     }
 

@@ -19,15 +19,18 @@ export interface PlayerProfile {
   steamId: string;
   name: string;
   teams: TeamSummary[];
+  avatarUrl?: string | null;
 }
 
 export interface PlayerSummary {
   steamId: string;
   name: string;
+  competition?: string | null;
 }
 
 export interface TeamProfile {
   teamId: number;
+  teamTag: string;
   teamName: string;
   players: PlayerSummary[];
 }
@@ -190,6 +193,7 @@ export async function fetchEtf2lTeam(
   return {
     teamId: etf2lTeam.team.id,
     teamName: etf2lTeam.team.name,
+    teamTag: etf2lTeam.team.tag,
     players,
   }
 }
