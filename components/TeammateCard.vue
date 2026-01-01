@@ -5,14 +5,14 @@
         v-if="person.avatarUrl"
         :src="person.avatarUrl"
         :alt="person.name || person.id"
-        width="48"
-        height="48"
+        width="32"
+        height="32"
       />
       <div v-else class="placeholder-avatar">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="48"
-          height="48"
+          width="32"
+          height="32"
           fill="var(--muted)"
           viewBox="0 0 24 24"
         >
@@ -31,10 +31,11 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-          Steam
+            Steam
           </a>
         </span>
         <span v-if="person.rglName" class="alias rgl">
+          &middot;
           <a
             :href="`https://rgl.gg/Public/PlayerProfile?p=${person.id}`"
             target="_blank"
@@ -44,6 +45,7 @@
           </a>
         </span>
         <span v-if="person.etf2lName" class="alias etf2l">
+          &middot;
           ETF2L/{{ person.etf2lName }}
         </span>
       </div>
@@ -69,10 +71,8 @@ const props = defineProps<{
 <style scoped>
 .teammate-card {
   display: flex;
-  border: 1px solid var(--muted);
-  padding: 12px;
+  padding: 8px;
   border-radius: 8px;
-  background-color: var(--surface-2);
   flex-direction: row;
   width: 100%;
   gap: 12px;
@@ -80,12 +80,17 @@ const props = defineProps<{
 
 .teammate-card a {
   color: inherit;
+  text-decoration: none;
+}
+
+.teammate-card a:hover {
   text-decoration: underline;
 }
 
 .profile-picture {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .card-content {
@@ -96,7 +101,7 @@ const props = defineProps<{
 }
 
 .name {
-  font-weight: 700;
+  font-weight: 500;
   width: 100%;
 }
 
@@ -104,8 +109,10 @@ const props = defineProps<{
   gap: 8px;
   width: 100%;
   font-size: 12px;
+  color: var(--muted-text);
 }
 
+/*
 .alias.rgl {
   color: var(--mr-orange);
 }
@@ -113,6 +120,7 @@ const props = defineProps<{
 .alias.etf2l {
   color: var(--mr-blue);
 }
+*/
 
 .alias.steam {
   color: var(--muted-text);

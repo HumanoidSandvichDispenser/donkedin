@@ -60,6 +60,8 @@ watch(() => graph.pathInfo, (v) => {
   --danger: var(--mr-red);
   --warning: var(--mr-yellow);
   --muted-text: var(--mr-light-grey);
+  --rgl: var(--mr-orange);
+  --etf2l: var(--mr-blue);
 }
 
 body {

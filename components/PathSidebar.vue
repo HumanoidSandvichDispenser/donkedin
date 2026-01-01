@@ -199,6 +199,7 @@ h3 {
   align-items: center;
   position: relative;
   padding: 8px 0;
+  background-color: var(--surface-0);
 }
 
 .flow-item {

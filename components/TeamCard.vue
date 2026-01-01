@@ -4,24 +4,26 @@
     </div>
     <div class="inner-container">
       <div class="team-card subtle">
-        <div class="league">
-          <span v-if="team?.type" class="tag" :type="team.type">
+        <div class="league muted-text">
+          <span v-if="team?.type">
             {{ team.type.toUpperCase() }}
           </span>
-          <span v-if="team?.seasonName" class="muted-text">
+          <span v-if="team?.seasonName">
             {{ team.seasonName }}
+          </span>
+          <span class="muted-text" v-if="team?.divisionName">
+            {{ team.divisionName }}
           </span>
         </div>
         <div class="team-name">
-          {{ team?.name }}
+          <span :class="[team?.type]">
+            {{ team?.name }}
+          </span>
           <span v-if="team?.tag" class="tag-name">
             ({{ team?.tag }})
           </span>
         </div>
         <div v-if="team?.divisionName">
-          <span class="muted-text">
-            {{ team.divisionName }}
-          </span>
         </div>
       </div>
     </div>
@@ -50,7 +52,7 @@ const props = defineProps<{
 
 .line {
   width: 1px;
-  margin-left: 36px;
+  margin-left: 24px;
   margin-right: 12px;
   height: 100%;
   background-color: var(--muted);
@@ -58,17 +60,11 @@ const props = defineProps<{
 
 .inner-container {
   flex: 1;
-  padding: 12px;
 }
 
 .team-card.subtle {
   font-family: "Inter", sans-serif;
-  padding: 10px;
-  border: none;
-  background-color: var(--bg);
-  /*border: 1px solid var(--muted);*/
-  border-radius: 8px;
-  color: var(--text);
+  color: var(--muted-text);
   font-size: 13px;
   text-align: left;
   box-shadow: none;
@@ -79,7 +75,7 @@ const props = defineProps<{
 }
 
 .team-name {
-  font-weight: 600;
+  color: var(--text);
 }
 
 .league {
@@ -87,7 +83,6 @@ const props = defineProps<{
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #888;
 }
 
 .tag {
@@ -97,15 +92,23 @@ const props = defineProps<{
   padding: 2px 6px;
 }
 
+span.rgl {
+  color: var(--rgl);
+}
+
+span.etf2l {
+  color: var(--etf2l);
+}
+
 .tag[type="rgl"] {
-  background-color: var(--mr-orange);
+  background-color: var(--rgl);
   color: white;
   border-radius: 4px;
   padding: 2px 6px;
 }
 
 .tag[type="etf2l"] {
-  background-color: var(--mr-blue);
+  background-color: var(--etf2l);
   color: white;
   border-radius: 4px;
   padding: 2px 6px;
