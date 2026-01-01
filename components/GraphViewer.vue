@@ -1,21 +1,5 @@
 <template>
   <div class="graph-viewer">
-    <div class="controls">
-      <div class="search-controls">
-        <input
-          class="input"
-          v-model="source"
-          placeholder="source (steamid64, rgl:alias, etf2l:alias)"
-        />
-        <input
-          class="input"
-          v-model="dest"
-          placeholder="destination (optional)"
-        />
-        <button class="btn" @click="handleLoad">Load</button>
-        <button class="btn" @click="centerFirst">Center First Node</button>
-      </div>
-    </div>
     <div ref="container" class="graph-container"></div>
   </div>
 </template>
@@ -38,8 +22,6 @@ let liveLayout: any = null;
 
 const graph = useGraphStore();
 
-const source = ref("");
-const dest = ref("");
 
 function makeNodeId(n: any) {
   if (!n) return "";
@@ -71,35 +53,6 @@ function clearCy() {
   cy.elements().remove();
 }
 
-async function handleLoad() {
-  if (!source.value) return;
-
-  // clear existing graph
-  clearCy();
-  graph.clear();
-
-  // Always add source node
-  if (!dest.value) {
-    await graph.loadSourceOnly(source.value);
-    syncStoreToCy();
-    return;
-  }
-
-  // dest provided: call path API to get nodes and segments
-  await graph.loadPath(source.value, dest.value);
-  syncStoreToCy();
-
-  if (cy) {
-    const layout = cy.layout({
-      name: 'fcose',
-      animate: true,
-      animationDuration: 250,
-      animationEasing: "ease-in",
-      fit: true,
-    });
-    layout.run();
-  }
-}
 
 function setupCy(initial?: { nodes: any[]; links: any[] }) {
   if (!container.value) return;
@@ -190,6 +143,13 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
           animationEasing: "ease-in",
         })
         .run();
+    }
+  });
+
+  // allow other components to request a visual clear
+  watch(() => graph.clearRequested, (v) => {
+    if (v && cy) {
+      clearCy();
     }
   });
 

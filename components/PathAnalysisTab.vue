@@ -1,8 +1,10 @@
 <template>
   <div class="path-analysis">
-    <template v-if="pathPlayers.length">
-      <PathCount :pathPlayers="pathPlayers" />
-      <div class="flow">
+  <PathControls />
+  <template v-if="pathPlayers.length">
+    <PathCount :pathPlayers="pathPlayers" />
+    <div class="flow">
+
         <template v-for="(p, idx) in pathPlayers" :key="pKey(p)">
           <div class="flow-item">
             <div class="player-box">
@@ -18,7 +20,27 @@
     </template>
 
     <div v-else class="no-path">
-      Input two players to see their connection path.
+      <!-- branch svg -->
+      <svg
+        width="256px"
+        height="256px"
+        viewBox="0 0 24 24"
+        fill="var(--muted)"
+        stroke="var(--muted)"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M13.5 7L17 10.5" stroke-linecap="round"/>
+        <path d="M7 13.5L10.5 17" stroke-linecap="round"/>
+        <path d="M10.5 7L7 10.5" stroke-linecap="round"/>
+        <path d="M17 13.5L13.5 17" stroke-linecap="round"/>
+        <circle cx="12" cy="5.5" r="2" />
+        <circle cx="12" cy="18.5" r="2" />
+        <circle cx="5.5" cy="12" r="2" />
+        <circle cx="18.5" cy="12" r="2" />
+      </svg>
+      <span>
+        Input two players to see their connection path.
+      </span>
     </div>
   </div>
 </template>
@@ -29,6 +51,8 @@ import { useGraphStore } from "@/stores/graph";
 import TeammateCard from "@@/components/TeammateCard.vue";
 import TeamCard from "@@/components/TeamCard.vue";
 import PathCount from "./PathCount.vue";
+import PathControls from "@@/components/PathControls.vue";
+import GraphIcon from "@/assets/graph.svg?inline";
 
 const graph = useGraphStore();
 
@@ -195,9 +219,12 @@ function teamBetween(prevIdx: number, currIdx: number) {
 }
 
 .no-path {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   color: var(--muted-text);
   background-color: var(--surface-0);
   border-radius: 10px;
-  padding: 16px;
+  padding: 32px 16px;
 }
 </style>
