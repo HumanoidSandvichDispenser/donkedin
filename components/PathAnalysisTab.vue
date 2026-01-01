@@ -1,8 +1,8 @@
 <template>
-  <aside class="path-analysis-tab">
-    <PathCount :pathPlayers="pathPlayers" />
-    <div class="flow">
-      <template v-if="pathPlayers.length">
+  <div class="path-analysis">
+    <template v-if="pathPlayers.length">
+      <PathCount :pathPlayers="pathPlayers" />
+      <div class="flow">
         <template v-for="(p, idx) in pathPlayers" :key="pKey(p)">
           <div class="flow-item">
             <div class="player-box">
@@ -14,11 +14,13 @@
             </div>
           </div>
         </template>
-      </template>
+      </div>
+    </template>
 
-      <div v-else class="no-path">No path loaded</div>
+    <div v-else class="no-path">
+      Input two players to see their connection path.
     </div>
-  </aside>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -160,21 +162,11 @@ function teamBetween(prevIdx: number, currIdx: number) {
 </script>
 
 <style scoped>
-h3 {
-  margin: 20px 40px;
-}
-
-.path-analysis-tab {
+.path-analysis {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 400px;
-  max-height: calc(100vh - 40px);
   overflow-y: auto;
-  border-left: 1px solid var(--muted);
-  padding: 16px;
-  background: var(--bg);
-  position: relative;
 }
 
 .flow {
@@ -200,5 +192,12 @@ h3 {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.no-path {
+  color: var(--muted-text);
+  background-color: var(--surface-0);
+  border-radius: 10px;
+  padding: 16px;
 }
 </style>

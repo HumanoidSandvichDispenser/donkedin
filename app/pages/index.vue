@@ -3,14 +3,14 @@
     <div class="main">
       <GraphViewer :initialGraph="graph" />
     </div>
-    <PathAnalysisTab />
+    <PathSidebar />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import GraphViewer from '@@/components/GraphViewer.vue';
-import PathAnalysisTab from '@@/components/PathAnalysisTab.vue';
+import PathSidebar from '@@/components/PathSidebar.vue';
 
 const graph = ref({ nodes: [], links: [] });
 
