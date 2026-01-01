@@ -12,6 +12,7 @@
             {{ team.seasonName }}
           </span>
           <span class="muted-text" v-if="team?.divisionName">
+            &mdash;
             {{ team.divisionName }}
           </span>
         </div>
@@ -51,7 +52,7 @@ const props = defineProps<{
 }
 
 .line {
-  width: 1px;
+  width: 2px;
   margin-left: 24px;
   margin-right: 12px;
   height: 100%;

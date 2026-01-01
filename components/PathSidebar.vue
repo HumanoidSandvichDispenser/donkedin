@@ -1,7 +1,6 @@
 <template>
   <aside class="path-sidebar">
-    <h3>{{ pathTitle }}</h3>
-
+    <PathCount :pathPlayers="pathPlayers" />
     <div class="flow">
       <template v-if="pathPlayers.length">
         <template v-for="(p, idx) in pathPlayers" :key="pKey(p)">
@@ -27,6 +26,7 @@ import { computed } from "vue";
 import { useGraphStore } from "@/stores/graph";
 import TeammateCard from "@@/components/TeammateCard.vue";
 import TeamCard from "@@/components/TeamCard.vue";
+import PathCount from "./PathCount.vue";
 
 const graph = useGraphStore();
 
@@ -50,20 +50,6 @@ const pathPlayers = computed(() => {
     }
   }
   return out;
-});
-
-const pathTitle = computed(() => {
-  if (!pathPlayers.value || pathPlayers.value.length < 2) {
-    return "Shortest Path";
-  }
-  const firstNode = pathPlayers.value[0].node;
-  const lastNode = pathPlayers.value[pathPlayers.value.length - 1].node;
-  const fprops = firstNode.properties;
-  const lprops = lastNode.properties;
-  const firstName = fprops.rglName ?? fprops.etf2lName;
-  const lastName = lprops.rglName ?? lprops.etf2lName;
-  const k = Math.max(0, pathPlayers.value.length - 1);
-  return `${firstName} and ${lastName} are degree-${k} connections!`;
 });
 
 function mapPlayer(n: any) {
@@ -184,11 +170,14 @@ h3 {
 }
 
 .path-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   width: 400px;
   max-height: calc(100vh - 40px);
   overflow-y: auto;
   border-left: 1px solid var(--muted);
-  padding: 12px;
+  padding: 16px;
   background: var(--bg);
   position: relative;
 }
@@ -198,12 +187,13 @@ h3 {
   flex-direction: column;
   align-items: center;
   position: relative;
-  padding: 8px 0;
+  padding: 16px;
   background-color: var(--surface-0);
+  border-radius: 10px;
 }
 
 .flow-item {
-  position: relative;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -212,7 +202,7 @@ h3 {
 
 .player-box,
 .team-box {
-  width: 320px;
+  width: 100%;
   display: flex;
   justify-content: center;
 }
