@@ -31,7 +31,7 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            Steam
+            Steam &nearr;
           </a>
         </span>
         <span v-if="person.rglName" class="alias rgl">
@@ -41,7 +41,7 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            RGL/{{ person.rglName }}
+            RGL/{{ person.rglName }} &nearr;
           </a>
         </span>
         <span v-if="person.etf2lName" class="alias etf2l">
@@ -109,20 +109,6 @@ const props = defineProps<{
   gap: 8px;
   width: 100%;
   font-size: 12px;
-  color: var(--muted-text);
-}
-
-/*
-.alias.rgl {
-  color: var(--mr-orange);
-}
-
-.alias.etf2l {
-  color: var(--mr-blue);
-}
-*/
-
-.alias.steam {
-  color: var(--muted-text);
+  color: var(--subtext);
 }
 </style>

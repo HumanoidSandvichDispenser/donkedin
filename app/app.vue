@@ -36,6 +36,7 @@ watch(() => graph.pathInfo, (v) => {
   --mr-bg-blue: #203a41;
   --mr-fg: #e6d6ac;
   --mr-fg-light: #f7f5ed;
+  --mr-fg-dark: #807178;
   --mr-red: #e68183;
   --mr-orange: #e39b7b;
   --mr-yellow: #d9bb80;
@@ -44,7 +45,7 @@ watch(() => graph.pathInfo, (v) => {
   --mr-blue: #89beba;
   --mr-purple: #d3a0bc;
   --mr-grey: #444444;
-  --mr-light-grey: #5b5b5b;
+  --mr-light-grey: #5e5459;
   --mr-gold: #d8caac;
 
   /* Semantic aliases */
@@ -60,6 +61,7 @@ watch(() => graph.pathInfo, (v) => {
   --danger: var(--mr-red);
   --warning: var(--mr-yellow);
   --muted-text: var(--mr-light-grey);
+  --subtext: var(--mr-fg-dark);
   --rgl: var(--mr-orange);
   --etf2l: var(--mr-blue);
 }
