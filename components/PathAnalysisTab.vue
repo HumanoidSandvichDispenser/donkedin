@@ -1,5 +1,5 @@
 <template>
-  <aside class="path-sidebar">
+  <aside class="path-analysis-tab">
     <PathCount :pathPlayers="pathPlayers" />
     <div class="flow">
       <template v-if="pathPlayers.length">
@@ -56,12 +56,7 @@ function mapPlayer(n: any) {
   const props = n.properties || {};
   return {
     id: props.id ?? n.id,
-    name:
-      props.rglName ??
-      props.etf2lName ??
-      props.name ??
-      props.label ??
-      String(n.id),
+    name: props.rglName ?? props.etf2lName ?? String(n.id),
     rglName: props.rglName,
     etf2lName: props.etf2lName,
     avatarUrl: props.avatarUrl,
@@ -169,7 +164,7 @@ h3 {
   margin: 20px 40px;
 }
 
-.path-sidebar {
+.path-analysis-tab {
   display: flex;
   flex-direction: column;
   gap: 16px;
