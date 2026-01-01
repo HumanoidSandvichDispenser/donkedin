@@ -1,10 +1,9 @@
 <template>
   <div class="path-analysis">
-  <PathControls />
-  <template v-if="pathPlayers.length">
-    <PathCount :pathPlayers="pathPlayers" />
-    <div class="flow">
-
+    <PathControls />
+    <template v-if="pathPlayers.length">
+      <PathCount :pathPlayers="pathPlayers" />
+      <div class="flow">
         <template v-for="(p, idx) in pathPlayers" :key="pKey(p)">
           <div class="flow-item">
             <div class="player-box">
@@ -12,7 +11,14 @@
             </div>
 
             <div v-if="idx < pathPlayers.length - 1" class="team-box">
-              <TeamCard :team="teamBetween(pathPlayers[idx].index, pathPlayers[idx + 1].index)"/>
+              <TeamCard
+                :team="
+                  teamBetween(
+                    pathPlayers[idx].index,
+                    pathPlayers[idx + 1].index,
+                  )
+                "
+              />
             </div>
           </div>
         </template>
@@ -29,18 +35,16 @@
         stroke="var(--muted)"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path d="M13.5 7L17 10.5" stroke-linecap="round"/>
-        <path d="M7 13.5L10.5 17" stroke-linecap="round"/>
-        <path d="M10.5 7L7 10.5" stroke-linecap="round"/>
-        <path d="M17 13.5L13.5 17" stroke-linecap="round"/>
+        <path d="M13.5 7L17 10.5" stroke-linecap="round" />
+        <path d="M7 13.5L10.5 17" stroke-linecap="round" />
+        <path d="M10.5 7L7 10.5" stroke-linecap="round" />
+        <path d="M17 13.5L13.5 17" stroke-linecap="round" />
         <circle cx="12" cy="5.5" r="2" />
         <circle cx="12" cy="18.5" r="2" />
         <circle cx="5.5" cy="12" r="2" />
         <circle cx="18.5" cy="12" r="2" />
       </svg>
-      <span>
-        Input two players to see their connection path.
-      </span>
+      <span> Input two players to see their connection path. </span>
     </div>
   </div>
 </template>
@@ -110,10 +114,7 @@ function teamBetween(prevIdx: number, currIdx: number) {
           : "team";
 
       return {
-        name:
-          props.name ??
-          props.label ??
-          String(n.id),
+        name: props.name ?? props.label ?? String(n.id),
         divisionName: props.divisionName,
         seasonName: props.seasonName,
         tag: props.tag,

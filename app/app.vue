@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <main class="app-root">
     <NuxtRouteAnnouncer />
     <NuxtPage />
-  </div>
+  </main>
 </template>
 
 <script setup lang="ts">
@@ -69,8 +69,15 @@ watch(() => graph.pathInfo, (v) => {
 body {
   /*font-family: "Noto Serif", serif;*/
   font-family: "Inter", sans-serif;
-  background-color: var(--bg);
+  background-color: var(--surface-0);
   color: var(--text);
+  margin: 0;
+}
+
+.app-root {
+  padding: 0 16px;
+  margin: 0 192px;
+  background-color: var(--bg);
 }
 
 a {
@@ -95,7 +102,7 @@ button, .btn {
 }
 
 button:hover, .btn:hover {
-  transform: translateY(-2px);
+  border-color: var(--accent);
   filter: brightness(1.03);
 }
 

@@ -22,7 +22,6 @@ let liveLayout: any = null;
 
 const graph = useGraphStore();
 
-
 function makeNodeId(n: any) {
   if (!n) return "";
   if (n.type && n.type !== "player") return `${n.type}:${n.id}`;
@@ -30,29 +29,44 @@ function makeNodeId(n: any) {
 }
 
 function syncStoreToCy() {
-  if (!cy) return;
+  if (!cy) {
+    return;
+  }
+
+  if (graph.nodes.length === 0 && graph.links.length === 0) {
+    cy.elements().remove();
+    return;
+  }
 
   // add any missing nodes from store
   for (const n of graph.nodes) {
     const id = makeNodeId(n);
     if (cy.$id(id).length === 0) {
-      cy.add({ data: { id, label: n.name || n.id, origId: n.id, type: n.type || 'player' } });
+      cy.add({
+        data: {
+          id,
+          label: n.name || n.id,
+          origId: n.id,
+          type: n.type || "player",
+        },
+      });
     }
   }
 
   // add any missing edges from store
   for (const e of graph.links) {
     if (cy.$id(e.id).length === 0) {
-      cy.add({ data: { id: e.id, source: e.source, target: e.target, weight: e.weight ?? 1 } });
+      cy.add({
+        data: {
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          weight: e.weight ?? 1,
+        },
+      });
     }
   }
 }
-
-function clearCy() {
-  if (!cy) return;
-  cy.elements().remove();
-}
-
 
 function setupCy(initial?: { nodes: any[]; links: any[] }) {
   if (!container.value) return;
@@ -69,7 +83,7 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
           id: makeNodeId(n),
           label: n.name || n.id,
           origId: n.id,
-          type: n.type || 'player',
+          type: n.type || "player",
         },
       })),
       edges: (initial?.links || []).map((l: any, i: number) => ({
@@ -83,24 +97,24 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
     },
     style: [
       {
-        selector: 'node',
+        selector: "node",
         style: {
-          'font-size': 5,
-          'text-valign': 'center',
-          'text-halign': 'center',
-          'font-family': 'Inter',
-          'font-weight': 600,
-          'max-width': '100%',
-          'overflow': 'hidden',
-          'text-overflow': 'ellipsis',
+          "font-size": 5,
+          "text-valign": "center",
+          "text-halign": "center",
+          "font-family": "Inter",
+          "font-weight": 600,
+          "max-width": "100%",
+          overflow: "hidden",
+          "text-overflow": "ellipsis",
         },
       },
       {
         selector: 'node[type="player"]',
         style: {
-          'background-color': '#5b5b5b',
-          label: 'data(label)',
-          color: '#fff',
+          "background-color": "#5b5b5b",
+          label: "data(label)",
+          color: "#fff",
           width: 30,
           height: 30,
         },
@@ -108,9 +122,9 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
       {
         selector: 'node[type="rgl"]',
         style: {
-          'background-color': '#e39b7b',
-          label: 'data(label)',
-          color: '#fff',
+          "background-color": "#e39b7b",
+          label: "data(label)",
+          color: "#fff",
           width: 28,
           height: 28,
         },
@@ -118,51 +132,81 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
       {
         selector: 'node[type="etf2l"]',
         style: {
-          'background-color': '#89beba',
-          label: 'data(label)',
-          color: '#fff',
+          "background-color": "#89beba",
+          label: "data(label)",
+          color: "#fff",
           width: 28,
           height: 28,
         },
       },
-      { selector: 'edge', style: { width: 1, 'line-color': '#383135' } },
+      { selector: "edge", style: { width: 1, "line-color": "#383135" } },
     ],
-    layout: { name: 'fcose', animationEasing: "ease-in" },
+    layout: { name: "fcose", animationEasing: "ease-in" },
   });
 
   // react to store changes by syncing
-  watch(() => graph.nodes.slice(), () => syncStoreToCy());
-  watch(() => graph.links.slice(), () => {
-    syncStoreToCy();
-    if (cy) {
-      cy
-        .layout({
-          name: 'fcose',
+  watch(
+    () => graph.nodes.slice(),
+    () => syncStoreToCy(),
+  );
+  watch(
+    () => graph.links.slice(),
+    () => {
+      syncStoreToCy();
+      if (cy) {
+        cy.layout({
+          name: "fcose",
           animate: true,
           animationDuration: 250,
           animationEasing: "ease-in",
-        })
-        .run();
-    }
-  });
+        }).run();
+      }
+    },
+  );
 
-  // allow other components to request a visual clear
-  watch(() => graph.clearRequested, (v) => {
-    if (v && cy) {
-      clearCy();
-    }
-  });
+  // single tap selects node (shows details); a quick second tap expands the node
+  let tappedBefore: any = null;
+  let tappedTimeout: any = null;
 
-  cy.on('tap', 'node', (evt) => {
+  cy.on("tap", "node", (evt) => {
     const node = evt.target;
-    const origId = node.data('origId');
-    const type = node.data('type');
-    graph.expandNodeById(String(origId), type);
+    const origId = node.data("origId");
+    const type = node.data("type") || "player";
+    const name = node.data("label") || String(origId);
+
+    // always perform single-click behavior immediately
+    graph.selectNode({
+      id: String(origId),
+      type,
+      name,
+      raw: { id: origId, labels: [type] },
+    });
+
+    if (tappedTimeout && tappedBefore) {
+      clearTimeout(tappedTimeout);
+      if (tappedBefore === node) {
+        // treat as double-click: expand the node as well
+        graph.expandNodeById(String(origId), type);
+      }
+      tappedBefore = null;
+      tappedTimeout = null;
+      return;
+    }
+
+    tappedBefore = node;
+    tappedTimeout = setTimeout(() => {
+      // timeout expired: no second tap — clear state
+      tappedBefore = null;
+      tappedTimeout = null;
+    }, 300);
   });
 }
 
 function centerFirst() {
-  if (!cy) return;
+  if (!cy) {
+    return;
+  }
+
   const nodes = cy.nodes();
   if (!nodes || nodes.length === 0) return;
   const first = nodes[0];

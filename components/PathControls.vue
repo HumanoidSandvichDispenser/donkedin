@@ -14,28 +14,27 @@
           v-model="dest"
           placeholder="destination (optional)"
         />
-        <button class="btn" @click="handleLoad" :disabled="loading">Load</button>
+        <button class="btn" @click="handleLoad" :disabled="loading">
+          Load
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useGraphStore } from '@/stores/graph';
+import { ref } from "vue";
+import { useGraphStore } from "@/stores/graph";
 
 const graph = useGraphStore();
-const source = ref('');
-const dest = ref('');
+const source = ref("");
+const dest = ref("");
 const loading = ref(false);
 
 async function handleLoad() {
   if (!source.value) return;
   loading.value = true;
   try {
-    // signal components to clear their visuals if needed
-    graph.requestClear();
-
     // clear store state
     graph.clear();
 
@@ -46,11 +45,9 @@ async function handleLoad() {
 
     await graph.loadPath(source.value, dest.value);
   } catch (err) {
-    console.error('Path load failed', err);
+    console.error("Path load failed", err);
   } finally {
     loading.value = false;
-    // ack clear request so viewer can stop clearing
-    graph.ackClearRequest();
   }
 }
 </script>
