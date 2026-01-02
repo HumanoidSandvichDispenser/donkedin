@@ -29,7 +29,9 @@
     </div>
     <div class="card-content">
       <div class="name">
-        {{ person?.rglName ?? person?.etf2lName ?? person?.id ?? placeholderText }}
+        {{
+          person?.rglName ?? person?.etf2lName ?? person?.id ?? placeholderText
+        }}
       </div>
       <div class="aliases" v-if="person">
         <span class="alias steam">

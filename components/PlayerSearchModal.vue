@@ -30,7 +30,10 @@
       </div>
 
       <div v-if="!isSteamId">
-        <div v-if="results.length === 0 && !loading" class="no-results muted-text">
+        <div
+          v-if="results.length === 0 && !loading"
+          class="no-results muted-text"
+        >
           No results. Try inputting the exact SteamID64 to select a specific
           player.
         </div>

@@ -3,7 +3,11 @@
     <div class="modal" role="dialog" aria-modal="true">
       <header class="modal-header">
         <slot name="header" />
-        <button class="icon modal-close" @click="handleClose" aria-label="Close">
+        <button
+          class="icon modal-close"
+          @click="handleClose"
+          aria-label="Close"
+        >
           ✕
         </button>
       </header>
