@@ -28,6 +28,10 @@ export const useGraphStore = defineStore("graph", () => {
     }
   }
 
+  function removeNodeById(nodeId: string) {
+    nodes.value = nodes.value.filter((n) => makeNodeId(n) != nodeId);
+  }
+
   function addEdgeIfMissing(source: any, target: any, weight = 1) {
     const sid = makeNodeId(source);
     const tid = makeNodeId(target);
@@ -35,6 +39,10 @@ export const useGraphStore = defineStore("graph", () => {
     if (!links.value.find((e) => e.id === edgeId)) {
       links.value.push({ id: edgeId, source: sid, target: tid, weight });
     }
+  }
+
+  function removeEdgeById(edgeId: string) {
+    links.value = links.value.filter((e) => makeNodeId(e) != edgeId);
   }
 
   async function expandNodeById(origId: string, type: string) {
@@ -241,6 +249,7 @@ export const useGraphStore = defineStore("graph", () => {
     addNodeIfMissing,
     addEdgeIfMissing,
     expandNodeById,
+    removeNodeById,
     loadSourceOnly,
     loadPath,
     selectedNode,

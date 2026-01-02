@@ -407,9 +407,14 @@ function removeSelectedNode() {
   }
 
   //cy.remove(makeNodeId(graph.selectedNode));
-  const node = cy.$id(makeNodeId(graph.selectedNode));
+  const id = makeNodeId(graph.selectedNode);
+  const node = cy.$id(id);
   cy.remove(node);
-  graph.removeNode(node);
+  graph.removeNodeById(id);
+  cy.edges().forEach((edge) => {
+    const edgeId = `e:${edge.source}->${edge.target}`;
+    removeEdgeById(edgeId);
+  });
 }
 
 const nodeList = computed(() =>
