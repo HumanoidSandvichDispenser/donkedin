@@ -66,6 +66,24 @@ function syncStoreToCy() {
       });
     }
   }
+
+  // update selection classes
+  try {
+    const selId = graph.selectedNode?.id
+      ? makeNodeId({ id: graph.selectedNode.id, type: graph.selectedNode.type })
+      : null;
+    if (selId) {
+      cy.elements().removeClass("selected");
+      const el = cy.$id(selId);
+      if (el) {
+        el.addClass("selected");
+      }
+    } else {
+      cy.elements().removeClass("selected");
+    }
+  } catch (err) {
+    /* ignore */
+  }
 }
 
 function setupCy(initial?: { nodes: any[]; links: any[] }) {
@@ -140,6 +158,20 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
         },
       },
       { selector: "edge", style: { width: 1, "line-color": "#383135" } },
+      {
+        selector: "node.selected",
+        style: {
+          "outline-width": 1,
+          "outline-color": "#e39b7b",
+          "outline-offset": 2,
+          "border-opacity": 1,
+          "shadow-color": "#e39b7b",
+          "shadow-blur": 4,
+          "shadow-opacity": 0.85,
+          "shadow-offset-x": 0,
+          "shadow-offset-y": 0,
+        },
+      },
     ],
     layout: { name: "fcose", animationEasing: "ease-in" },
   });
@@ -162,6 +194,37 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
         }).run();
       }
     },
+  );
+
+  // update selection immediately when selectedNode changes
+  watch(
+    () => graph.selectedNode,
+    (v) => {
+      try {
+        if (!cy) {
+          return;
+        }
+
+        cy.elements().removeClass("selected");
+
+        if (v && v.id) {
+          const selId = makeNodeId({ id: v.id, type: v.type });
+          const el = cy.$id(selId);
+          if (el && el.length) {
+            el.addClass("selected");
+            // bring selected node to front for visibility
+            try {
+              el.move({ parent: null });
+            } catch (e) {
+              /* ignore */
+            }
+          }
+        }
+      } catch (err) {
+        /* ignore */
+      }
+    },
+    { flush: "post" },
   );
 
   // single tap selects node (shows details); a quick second tap expands the node
