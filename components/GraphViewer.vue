@@ -1,15 +1,54 @@
 <template>
   <div class="graph-viewer">
     <div ref="container" class="graph-container"></div>
+
+    <div class="floating-controls">
+      <button class="btn" @click="openAddModal" title="Add player">＋</button>
+      <button
+        class="btn"
+        @click="removeSelectedNode"
+        :disabled="!graph.selectedNode"
+        title="Remove selected node"
+      >
+        −
+      </button>
+      <button class="btn" @click="openFindModal" title="Find node">🔍</button>
+    </div>
+
+    <PlayerSearchModal
+      v-model="showAddModal"
+      @select="onAddSelected"
+      @close="closeAddModal"
+    />
+
+    <div v-if="showFindModal" class="find-modal-overlay">
+      <div class="find-modal">
+        <div class="form-row">
+          <input v-model="filterText" placeholder="Search nodes..." />
+          <button class="btn" @click="closeFindModal">Close</button>
+        </div>
+        <div class="node-list">
+          <button
+            v-for="n in filteredNodes"
+            :key="nKey(n)"
+            class="btn-ghost"
+            @click="jumpToNode(n)"
+          >
+            {{ n.name }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount, computed } from "vue";
 import cytoscape from "cytoscape";
 import cola from "cytoscape-cola";
 import fcose from "cytoscape-fcose";
 import { useGraphStore } from "@/stores/graph";
+import PlayerSearchModal from "@@/components/PlayerSearchModal.vue";
 
 cytoscape.use(cola);
 cytoscape.use(fcose);
@@ -23,8 +62,14 @@ let liveLayout: any = null;
 const graph = useGraphStore();
 
 function makeNodeId(n: any) {
-  if (!n) return "";
-  if (n.type && n.type !== "player") return `${n.type}:${n.id}`;
+  if (!n) {
+    return "";
+  }
+
+  if (n.type && n.type !== "player") {
+    return `${n.type}:${n.id}`;
+  }
+
   return `player:${n.id}`;
 }
 
@@ -166,11 +211,7 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
           "outline-color": "#e39b7b",
           "outline-offset": 1.5,
           "border-opacity": 1,
-          "shadow-color": "#e39b7b",
-          "shadow-blur": 4,
-          "shadow-opacity": 0.85,
-          "shadow-offset-x": 0,
-          "shadow-offset-y": 0,
+          shadow: "0 0 4px #e39b7b",
         },
       },
     ],
@@ -266,23 +307,151 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
   });
 }
 
-function centerFirst() {
-  if (!cy) {
-    return;
-  }
-
-  const nodes = cy.nodes();
-  if (!nodes || nodes.length === 0) return;
-  const first = nodes[0];
+function centerNode(origId: string, type: string = "player") {
+  if (!cy) return;
   try {
-    cy.animate({ fit: { eles: first, padding: 400 } }, { duration: 450 });
+    const el = cy.$id(makeNodeId({ id: origId, type }));
+    if (el && el.length) {
+      cy.animate({ fit: { eles: el, padding: 200 } }, { duration: 450 });
+      return;
+    }
+
+    // fallback: center first node
+    const nodes = cy.nodes();
+    if (nodes && nodes.length) {
+      try {
+        cy.animate(
+          { fit: { eles: nodes[0], padding: 400 } },
+          { duration: 450 },
+        );
+      } catch (e) {
+        cy.fit(nodes[0], 80);
+      }
+    }
   } catch (err) {
-    // fallback to immediate fit
-    cy.fit(first, 80);
+    try {
+      const nodes = cy.nodes();
+      if (nodes && nodes.length) cy.fit(nodes[0], 80);
+    } catch (e) {
+      /* ignore */
+    }
   }
 }
 
 onMounted(() => setupCy(props.initialGraph));
+
+// floating control state
+const showAddModal = ref(false);
+const showFindModal = ref(false);
+const loading = ref(false);
+const filterText = ref("");
+
+function openAddModal() {
+  showAddModal.value = true;
+}
+
+function closeAddModal() {
+  showAddModal.value = false;
+}
+
+// handle add selection from PlayerSearchModal
+async function onAddSelected(res: any) {
+  const p = res.player;
+  const player = {
+    id: p.id,
+    rglName: p.rglName,
+    etf2lName: p.etf2lName,
+    avatarUrl: p.avatarUrl,
+  };
+  // add node
+  graph.addNodeIfMissing({
+    id: player.id,
+    name: player.rglName ?? player.etf2lName ?? player.id,
+    type: "player",
+  });
+  closeAddModal();
+
+  // run layout then center on the newly-added node
+  if (cy) {
+    try {
+      const layout = cy.layout({
+        name: "fcose",
+        animate: true,
+        animationDuration: 300,
+        animationEasing: "ease-in",
+      });
+      layout.run();
+      // wait briefly for layout to reposition
+      setTimeout(() => {
+        centerNode(String(player.id), "player");
+      }, 350);
+    } catch (err) {
+      // fall back to immediate centering
+      centerNode(String(player.id), "player");
+    }
+  }
+}
+
+function openFindModal() {
+  showFindModal.value = true;
+}
+
+function closeFindModal() {
+  showFindModal.value = false;
+  filterText.value = "";
+}
+
+function removeSelectedNode() {
+  if (!graph.selectedNode) {
+    return;
+  }
+
+  //cy.remove(makeNodeId(graph.selectedNode));
+  const node = cy.$id(makeNodeId(graph.selectedNode));
+  cy.remove(node);
+  graph.removeNode(node);
+}
+
+const nodeList = computed(() =>
+  graph.nodes.map((n: any) => ({
+    id: n.id,
+    name: n.name || n.id,
+    type: n.type,
+  })),
+);
+const filteredNodes = computed(() => {
+  if (!filterText.value) return nodeList.value;
+  const q = filterText.value.toLowerCase();
+  return nodeList.value.filter(
+    (n: any) =>
+      String(n.name).toLowerCase().includes(q) ||
+      String(n.id).toLowerCase().includes(q),
+  );
+});
+
+function nKey(n: any) {
+  return `${n.type}:${n.id}`;
+}
+
+function jumpToNode(n: any) {
+  graph.selectNode({
+    id: String(n.id),
+    type: n.type,
+    name: n.name,
+    raw: { id: n.id },
+  });
+  if (cy) {
+    try {
+      const el = cy.$id(makeNodeId({ id: n.id, type: n.type }));
+      if (el && el.length) {
+        cy.animate({ fit: { eles: el, padding: 200 } }, { duration: 350 });
+      }
+    } catch (err) {
+      /* ignore */
+    }
+  }
+  closeFindModal();
+}
 
 watch(
   () => props.initialGraph,
@@ -308,6 +477,7 @@ onBeforeUnmount(() => {
 
 .graph-viewer {
   height: 100%;
+  position: relative;
 }
 
 .graph-container {
@@ -325,5 +495,63 @@ onBeforeUnmount(() => {
 
 .btn {
   cursor: pointer;
+}
+
+.floating-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.floating-controls .btn {
+  padding: 8px 10px;
+  min-width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.find-modal-overlay {
+  position: absolute;
+  top: 56px;
+  right: 12px;
+  z-index: 50;
+}
+
+.find-modal {
+  background: var(--surface-0);
+  border: 1px solid var(--muted);
+  padding: 12px;
+  border-radius: 10px;
+  width: 280px;
+}
+
+.node-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.02);
 }
 </style>

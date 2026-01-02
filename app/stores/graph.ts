@@ -6,10 +6,8 @@ const fetcher = (url: string, opts: any = {}) =>
     throw e;
   });
 
-function makeNodeId(n: any) {
-  if (!n) return "";
-  if (n.type && n.type !== "player") return `${n.type}:${n.id}`;
-  return `player:${n.id}`;
+function makeNodeId(n: { type: string; id: string }) {
+  return `${n.type}:${n.id}`;
 }
 
 export const useGraphStore = defineStore("graph", () => {
