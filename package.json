@@ -34,6 +34,7 @@
     "morpheus4j": "^4.5.2",
     "nuxt-scheduler": "^0.1.9",
     "prettier": "^3.7.4",
+    "prettier-plugin-brace-style": "^0.8.2",
     "vitest": "^4.0.16"
   }
 }

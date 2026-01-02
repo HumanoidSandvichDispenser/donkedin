@@ -8,5 +8,6 @@
   "arrowParens": "always",
   "vueIndentScriptAndStyle": false,
   "endOfLine": "lf",
-  "braceStyle": "1tbs"
+  "braceStyle": "1tbs",
+  "plugins": ["prettier-plugin-brace-style"]
 }
