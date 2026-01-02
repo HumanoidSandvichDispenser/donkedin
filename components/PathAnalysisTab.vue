@@ -1,6 +1,36 @@
 <template>
   <div class="path-analysis">
-    <PathControls />
+    <div class="path-controls">
+      <div class="row">
+        <button class="btn card-btn" @click="openSourceModal" type="button">
+          <TeammateCard
+            :person="sourcePlayer"
+            placeholder-text="Select a source player"
+          />
+        </button>
+
+        <button class="btn card-btn" @click="openDestModal" type="button">
+          <TeammateCard
+            :person="destPlayer"
+            placeholder-text="Select a destination player"
+          />
+        </button>
+
+        <button class="btn" @click="handleLoad" :disabled="loading">
+          Find Shortest Path
+        </button>
+      </div>
+    </div>
+    <PlayerSearchModal
+      v-model="showSourceModal"
+      @select="onSourceSelected"
+      @close="closeSourceModal"
+    />
+    <PlayerSearchModal
+      v-model="showDestModal"
+      @select="onDestSelected"
+      @close="closeDestModal"
+    />
     <template v-if="pathPlayers.length">
       <PathCount :pathPlayers="pathPlayers" />
       <div class="flow">
@@ -50,18 +80,99 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useGraphStore } from "@/stores/graph";
 import TeammateCard from "@@/components/TeammateCard.vue";
 import TeamCard from "@@/components/TeamCard.vue";
 import PathCount from "./PathCount.vue";
-import PathControls from "@@/components/PathControls.vue";
+import PlayerSearchModal from "@@/components/PlayerSearchModal.vue";
 import GraphIcon from "@/assets/graph.svg?inline";
 
 const graph = useGraphStore();
+const showSourceModal = ref(false);
+const showDestModal = ref(false);
+const loading = ref(false);
+const sourcePlayer = ref<any | null>(null);
+const destPlayer = ref<any | null>(null);
+
+const sourceLabel = computed(() => {
+  if (!sourcePlayer.value) return "";
+  return (
+    sourcePlayer.value.rglName ??
+    sourcePlayer.value.etf2lName ??
+    String(sourcePlayer.value.id)
+  );
+});
+
+const destLabel = computed(() => {
+  if (!destPlayer.value) return "";
+  return (
+    destPlayer.value.rglName ??
+    destPlayer.value.etf2lName ??
+    String(destPlayer.value.id)
+  );
+});
 
 // nodes in the raw path (in order)
 const rawNodes = computed(() => graph.pathInfo?.nodes || []);
+
+function openSourceModal() {
+  showSourceModal.value = true;
+}
+
+function openDestModal() {
+  showDestModal.value = true;
+}
+
+function closeSourceModal() {
+  showSourceModal.value = false;
+}
+
+function closeDestModal() {
+  showDestModal.value = false;
+}
+
+async function onSourceSelected(res: any) {
+  // player may be the full server response ({ player, teams }) or a direct object
+  const p = res.player;
+  sourcePlayer.value = {
+    id: p.id,
+    rglName: p.rglName,
+    etf2lName: p.etf2lName,
+    avatarUrl: p.avatarUrl,
+  };
+  showSourceModal.value = false;
+}
+
+async function onDestSelected(res: any) {
+  const p = res.player;
+  destPlayer.value = {
+    id: p.id,
+    rglName: p.rglName,
+    etf2lName: p.etf2lName,
+    avatarUrl: p.avatarUrl,
+  };
+  showDestModal.value = false;
+}
+
+async function handleLoad() {
+  if (!sourcePlayer.value) return;
+  const sourceIdVal = sourcePlayer.value.id;
+  const destIdVal = destPlayer.value ? destPlayer.value.id : null;
+  loading.value = true;
+  try {
+    graph.clear();
+    if (!destIdVal) {
+      await graph.loadSourceOnly(sourceIdVal);
+      return;
+    }
+    await graph.loadPath(sourceIdVal, destIdVal);
+  } catch (err) {
+    console.error("Path load failed", err);
+  } finally {
+    loading.value = false;
+  }
+}
 
 // collect only player nodes, preserving their index in the raw path
 const pathPlayers = computed(() => {
@@ -194,6 +305,16 @@ function teamBetween(prevIdx: number, currIdx: number) {
   overflow-y: auto;
 }
 
+.search-controls {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+}
+
 .flow {
   display: flex;
   flex-direction: column;
@@ -217,6 +338,23 @@ function teamBetween(prevIdx: number, currIdx: number) {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.no-select {
+  user-select: none;
+}
+
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.card-btn:hover {
+  border-color: var(--muted);
 }
 
 .no-path {

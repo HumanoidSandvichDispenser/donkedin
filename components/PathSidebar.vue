@@ -16,8 +16,8 @@
     </div>
 
     <div class="tab-body">
-      <DetailsTab v-if="activeTab === 'details'" />
-      <PathAnalysisTab v-if="activeTab === 'path'" />
+      <DetailsTab v-show="activeTab === 'details'" />
+      <PathAnalysisTab v-show="activeTab === 'path'" />
     </div>
   </aside>
 </template>

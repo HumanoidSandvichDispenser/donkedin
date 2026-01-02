@@ -1,7 +1,7 @@
 <template>
   <div class="path-count">
     <div class="count-label">
-      {{ firstNodeName }} and {{ lastNodeName }} are connected by
+      {{ firstNodeName }} and {{ lastNodeName }} are separated by
     </div>
     <div class="count-number">
       {{ degreeLabel }}

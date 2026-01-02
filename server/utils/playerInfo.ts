@@ -55,6 +55,7 @@ export async function readPlayerData(session: neo4j.Session, id: string) {
     rglName: pNode.properties?.rglName ?? null,
     etf2lName: pNode.properties?.etf2lName ?? null,
     lastUpdated: pNode.properties?.lastUpdated ?? null,
+    avatarUrl: pNode.properties?.avatarUrl ?? null,
   };
 
   const rglTeamsResRead = await session.executeRead((tx) =>
@@ -97,4 +98,37 @@ export async function readPlayerData(session: neo4j.Session, id: string) {
       etf2l: etf2lTeamsOut,
     },
   };
+}
+
+export async function searchPlayersByAlias(
+  session: neo4j.Session,
+  alias: string,
+  limit: number = 10,
+) {
+  const query = `
+    CALL db.index.fulltext.queryNodes("playerNames", $alias + "*") YIELD node, score
+    RETURN node, score
+    ORDER BY score DESC
+    LIMIT $limit
+  `;
+
+  const params: any = {
+    alias,
+    limit: neo4j.int(limit),
+  };
+  const res = await session.executeRead((tx) => tx.run(query, params));
+
+  return res.records.map((r) => {
+    const node = r.get("node");
+    const props = node?.properties ?? {};
+    const id = neo4j.isInt(props.id)
+      ? (props.id as neo4j.Integer).toNumber()
+      : props.id;
+    return {
+      id,
+      rglName: props.rglName ?? null,
+      etf2lName: props.etf2lName ?? null,
+      avatarUrl: props.avatarUrl ?? null,
+    };
+  });
 }

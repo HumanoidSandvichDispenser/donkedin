@@ -161,9 +161,10 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
       {
         selector: "node.selected",
         style: {
-          "outline-width": 1,
+          "animation-duration": "150ms",
+          "outline-width": 1.5,
           "outline-color": "#e39b7b",
-          "outline-offset": 2,
+          "outline-offset": 1.5,
           "border-opacity": 1,
           "shadow-color": "#e39b7b",
           "shadow-blur": 4,

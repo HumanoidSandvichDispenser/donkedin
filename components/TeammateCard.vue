@@ -1,10 +1,15 @@
 <template>
-  <div class="teammate-card">
+  <div
+    :class="{
+      'teammate-card': true,
+      'no-player': !person,
+    }"
+  >
     <div class="profile-picture">
       <img
-        v-if="person.avatarUrl"
+        v-if="person?.avatarUrl"
         :src="person.avatarUrl"
-        :alt="person.name || person.id"
+        :alt="person?.name ?? person?.id"
         width="32"
         height="32"
       />
@@ -23,8 +28,10 @@
       </div>
     </div>
     <div class="card-content">
-      <div class="name">{{ person.name || person.id }}</div>
-      <div class="aliases">
+      <div class="name">
+        {{ person?.rglName ?? person?.etf2lName ?? person?.id ?? placeholderText }}
+      </div>
+      <div class="aliases" v-if="person">
         <span class="alias steam">
           <a
             :href="`https://steamcommunity.com/profiles/${person.id}`"
@@ -64,6 +71,7 @@ const props = defineProps<{
     etf2lName?: string;
     avatarUrl?: string;
   };
+  placeholderText?: string;
 }>();
 </script>
 
@@ -102,6 +110,11 @@ const props = defineProps<{
 .name {
   font-weight: 500;
   width: 100%;
+  text-align: left;
+}
+
+.no-player .name {
+  color: var(--muted-text);
 }
 
 .aliases {

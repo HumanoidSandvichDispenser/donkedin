@@ -78,7 +78,7 @@ body {
 }
 
 .app-root {
-  padding: 0 16px;
+  padding: 0;
   margin: 0 192px;
   background-color: var(--bg);
 }
@@ -126,6 +126,19 @@ button:focus-visible,
   box-shadow:
     0 0 0 6px rgba(135, 192, 149, 0.16),
     0 8px 20px rgba(0, 0, 0, 0.55);
+}
+
+button.icon {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  aspect-ratio: 1 / 1;
+  color: var(--subtext);
+}
+
+button.icon:hover {
+  background-color: var(--surface-0);
 }
 
 /* Secondary / ghost buttons */
@@ -187,6 +200,10 @@ select:focus {
 /* small utility */
 .small {
   font-size: 0.9rem;
+  color: var(--muted-text);
+}
+
+.muted-text {
   color: var(--muted-text);
 }
 </style>
