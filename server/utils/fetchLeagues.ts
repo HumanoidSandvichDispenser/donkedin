@@ -60,17 +60,16 @@ export async function fetchRglExternalData(
     }
   }
 
-  const teams: TeamSummary[] = rglTeams
-    .map((t) => ({
-      teamId: t.teamId,
-      teamName: t.teamName,
-    }));
+  const teams: TeamSummary[] = rglTeams.map((t) => ({
+    teamId: t.teamId,
+    teamName: t.teamName,
+  }));
 
   return {
     steamId: rglProfile.steamId,
     name: rglProfile.name,
     teams,
-  }
+  };
 }
 
 export async function fetchEtf2lExternalData(
@@ -124,18 +123,19 @@ export async function fetchEtf2lExternalData(
     }
   }
 
-  const teams: TeamSummary[] = etf2lTransfers?.data
-    .filter((t) => t.type === "joined")
-    .map((t) => ({
-      teamId: t.team.id,
-      teamName: t.team.name,
-    })) ?? [];
+  const teams: TeamSummary[] =
+    etf2lTransfers?.data
+      .filter((t) => t.type === "joined")
+      .map((t) => ({
+        teamId: t.team.id,
+        teamName: t.team.name,
+      })) ?? [];
 
   return {
     steamId: etf2lPlayer.player.steam.id64,
     name: etf2lPlayer.player.name,
     teams,
-  }
+  };
 }
 
 export async function fetchEtf2lTeam(
@@ -154,8 +154,13 @@ export async function fetchEtf2lTeam(
 
   if (etf2lTeam) {
     try {
-      const first = (await client.team.getTeamTransfers(Number(id), 1)) as Etf2lTeamTransferResponse;
-      const collected: Etf2lTeamTransfer[] = Array.isArray(first.data) ? [...first.data] : [];
+      const first = (await client.team.getTeamTransfers(
+        Number(id),
+        1,
+      )) as Etf2lTeamTransferResponse;
+      const collected: Etf2lTeamTransfer[] = Array.isArray(first.data)
+        ? [...first.data]
+        : [];
       const current = first.meta?.current_page ?? 1;
       const lastPage = first.meta?.last_page ?? current;
 
@@ -183,17 +188,18 @@ export async function fetchEtf2lTeam(
     }
   }
 
-  const players: PlayerSummary[] = etf2lTransfers?.data
-    .filter((t) => t.type === "joined")
-    .map((t) => ({
-      steamId: t.who.steam.id64,
-      name: t.who.name,
-    })) ?? [];
+  const players: PlayerSummary[] =
+    etf2lTransfers?.data
+      .filter((t) => t.type === "joined")
+      .map((t) => ({
+        steamId: t.who.steam.id64,
+        name: t.who.name,
+      })) ?? [];
 
   return {
     teamId: etf2lTeam.team.id,
     teamName: etf2lTeam.team.name,
     teamTag: etf2lTeam.team.tag,
     players,
-  }
+  };
 }

@@ -7,7 +7,8 @@ export async function fetchAvatarUrl(steamId: string): string | null {
     return null;
   }
 
-  const url = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries" +
+  const url =
+    "http://api.steampowered.com/ISteamUser/GetPlayerSummaries" +
     `/v0002/?key=${key}&steamids=${steamId}`;
 
   const data: {
@@ -16,8 +17,8 @@ export async function fetchAvatarUrl(steamId: string): string | null {
         avatar: string;
         avatarmedium: string;
         avatarfull: string;
-      }>
-    },
+      }>;
+    };
   } = await $fetch(url);
 
   if (data.response.players.length === 0) {

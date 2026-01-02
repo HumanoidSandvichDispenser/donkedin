@@ -6,26 +6,29 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue';
-import { useGraphStore } from '@/stores/graph';
+import { watch } from "vue";
+import { useGraphStore } from "@/stores/graph";
 
 const graph = useGraphStore();
 
 // watch pathInfo so other parts of the app can react when a path is loaded
-watch(() => graph.pathInfo, (v) => {
-  // for now just log; UI to use this will be added later
-  if (v) {
-    console.debug('Graph path loaded', v);
-  }
-});
+watch(
+  () => graph.pathInfo,
+  (v) => {
+    // for now just log; UI to use this will be added later
+    if (v) {
+      console.debug("Graph path loaded", v);
+    }
+  },
+);
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap");
 
 :root {
   /* Miramare palette */
-  --mr-bg0: #2A2426;
+  --mr-bg0: #2a2426;
   --mr-bg1: #242021;
   --mr-bg2: #2e272a;
   --mr-bg3: #332c2f;
@@ -86,7 +89,8 @@ a {
 }
 
 /* Buttons */
-button, .btn {
+button,
+.btn {
   -webkit-appearance: none;
   appearance: none;
   display: inline-flex;
@@ -98,30 +102,37 @@ button, .btn {
   background: var(--surface-0);
   color: var(--text);
   cursor: pointer;
-  transition: transform 120ms ease, filter 120ms ease;
+  transition:
+    transform 120ms ease,
+    filter 120ms ease;
 }
 
-button:hover, .btn:hover {
+button:hover,
+.btn:hover {
   border-color: var(--accent);
   filter: brightness(1.03);
 }
 
-button:active, .btn:active {
+button:active,
+.btn:active {
   transform: translateY(0);
   filter: brightness(0.98);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-button:focus-visible, .btn:focus-visible {
+button:focus-visible,
+.btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 6px rgba(135,192,149,0.16), 0 8px 20px rgba(0,0,0,0.55);
+  box-shadow:
+    0 0 0 6px rgba(135, 192, 149, 0.16),
+    0 8px 20px rgba(0, 0, 0, 0.55);
 }
 
 /* Secondary / ghost buttons */
 .btn-secondary {
   background: transparent;
   color: var(--text);
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow: none;
 }
 
@@ -133,25 +144,33 @@ button:focus-visible, .btn:focus-visible {
 }
 
 /* Inputs, selects, textareas */
-input, textarea, select {
+input,
+textarea,
+select {
   background: var(--surface-0);
   color: var(--text);
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   padding: 0.25rem 1rem;
   border-radius: 8px;
-  transition: box-shadow 160ms ease, border-color 120ms ease, transform 120ms ease;
+  transition:
+    box-shadow 160ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
   outline: none;
   min-height: 2.2rem;
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: var(--muted-text);
   opacity: 0.95;
 }
 
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 6px rgba(135,192,149,0.12);
+  box-shadow: 0 0 0 6px rgba(135, 192, 149, 0.12);
   transform: translateY(-1px);
 }
 
@@ -159,8 +178,15 @@ input:focus, textarea:focus, select:focus {
 /*:focus:not(:focus-visible) { box-shadow: none; }*/
 
 /* make forms look tidy */
-.form-row { display:flex; gap:0.5rem; align-items:center; }
+.form-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
 
 /* small utility */
-.small { font-size: 0.9rem; color: var(--muted-text); }
+.small {
+  font-size: 0.9rem;
+  color: var(--muted-text);
+}
 </style>

@@ -22,9 +22,7 @@ export async function fetchRglSeason(
         name: sNode.properties.name ?? "",
         formatName: sNode.properties.formatName ?? "",
         regionName: sNode.properties.regionName ?? "",
-        maps: Array.isArray(sNode.properties.maps)
-          ? sNode.properties.maps
-          : [],
+        maps: Array.isArray(sNode.properties.maps) ? sNode.properties.maps : [],
       };
 
       return seasonOut;

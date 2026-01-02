@@ -8,7 +8,11 @@ import { fetchRglSeason } from "~~/server/utils/fetchRglSeason";
 const rglClient = new RglClient({ BASE: "https://api.rgl.gg" });
 
 // Upsert RGL team data and players
-async function upsertRglTeam(session: neo4j.Session, team: RglTeam, season: RglSeason) {
+async function upsertRglTeam(
+  session: neo4j.Session,
+  team: RglTeam,
+  season: RglSeason,
+) {
   const q = `
     MERGE (t:RglTeam {id: $id})
     SET t.name = $name, t.tag = $tag, t.lastUpdated = datetime()
@@ -30,9 +34,9 @@ async function upsertRglTeam(session: neo4j.Session, team: RglTeam, season: RglS
     name: team.name,
     tag: team.tag,
     players: team.players.map((p) => ({
-        steamId: p.steamId,
-        name: p.name,
-      })),
+      steamId: p.steamId,
+      name: p.name,
+    })),
     seasonId: team.seasonId,
     seasonName: season.name,
     formatName: season.formatName,

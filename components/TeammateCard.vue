@@ -45,8 +45,7 @@
           </a>
         </span>
         <span v-if="person.etf2lName" class="alias etf2l">
-          &middot;
-          ETF2L/{{ person.etf2lName }}
+          &middot; ETF2L/{{ person.etf2lName }}
         </span>
       </div>
     </div>
@@ -64,7 +63,7 @@ const props = defineProps<{
     rglName?: string;
     etf2lName?: string;
     avatarUrl?: string;
-  }
+  };
 }>();
 </script>
 

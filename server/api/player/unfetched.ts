@@ -42,7 +42,9 @@ export default defineEventHandler(async (event) => {
 
   try {
     const cypher = `MATCH (n:Player) WHERE n.lastUpdated IS NULL RETURN n LIMIT $limit`;
-    const res = await session.executeRead((tx) => tx.run(cypher, { limit: neo4j.int(count) }));
+    const res = await session.executeRead((tx) =>
+      tx.run(cypher, { limit: neo4j.int(count) }),
+    );
 
     const out: any[] = [];
     for (const rec of res.records) {

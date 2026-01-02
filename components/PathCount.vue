@@ -42,7 +42,7 @@ const lastNodeName = computed(() => {
 
 const degreeLabel = computed(() => {
   const n = hopCount.value;
-  return `${n} ${pluralize('degree', n)}`;
+  return `${n} ${pluralize("degree", n)}`;
 });
 </script>
 
@@ -51,7 +51,6 @@ const degreeLabel = computed(() => {
   background-color: var(--surface-0);
   padding: 16px;
   border-radius: 10px;
-
 }
 
 .path-count .count-label {

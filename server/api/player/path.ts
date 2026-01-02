@@ -55,7 +55,10 @@ export default defineEventHandler(async (event) => {
   const b = parseIdentifier(rawB);
 
   if (!a || !b) {
-    return createError({ statusCode: 400, statusMessage: "Missing source or target (a/b)" });
+    return createError({
+      statusCode: 400,
+      statusMessage: "Missing source or target (a/b)",
+    });
   }
 
   const driver = getDriver();
@@ -73,7 +76,9 @@ export default defineEventHandler(async (event) => {
       WHERE NONE(n IN nodes(p) WHERE (n:RglTeam AND n.tag = \"FA\"))
       RETURN p, nodes(p) as nodes`;
 
-    const res = await session.executeRead((tx) => tx.run(cypher, { a: a.value, b: b.value }));
+    const res = await session.executeRead((tx) =>
+      tx.run(cypher, { a: a.value, b: b.value }),
+    );
 
     if (!res.records || res.records.length === 0) {
       return { found: false, path: null };

@@ -1,5 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
-import { fetchRglExternalData, fetchEtf2lExternalData, fetchEtf2lTeam } from "../../server/utils/fetchLeagues";
+import {
+  fetchRglExternalData,
+  fetchEtf2lExternalData,
+  fetchEtf2lTeam,
+} from "../../server/utils/fetchLeagues";
 
 describe("fetchLeagues utils", () => {
   describe("fetchRglExternalData", () => {
@@ -20,11 +24,15 @@ describe("fetchLeagues utils", () => {
     it("returns profile and mapped teams when both calls succeed", async () => {
       const client: any = {
         profile: {
-          getV0Profile: vi.fn(() => Promise.resolve({ steamId: "S64", name: "RGLGuy" })),
-          getV0ProfileTeams: vi.fn(() => Promise.resolve([
-            { teamId: 1, teamName: "One" },
-            { teamId: 2, teamName: "Two" },
-          ])),
+          getV0Profile: vi.fn(() =>
+            Promise.resolve({ steamId: "S64", name: "RGLGuy" }),
+          ),
+          getV0ProfileTeams: vi.fn(() =>
+            Promise.resolve([
+              { teamId: 1, teamName: "One" },
+              { teamId: 2, teamName: "Two" },
+            ]),
+          ),
         },
       };
 
@@ -41,8 +49,12 @@ describe("fetchLeagues utils", () => {
     it("returns profile with empty teams when teams call fails", async () => {
       const client: any = {
         profile: {
-          getV0Profile: vi.fn(() => Promise.resolve({ steamId: "S64", name: "RGLGuy" })),
-          getV0ProfileTeams: vi.fn(() => Promise.reject(new Error("teams down"))),
+          getV0Profile: vi.fn(() =>
+            Promise.resolve({ steamId: "S64", name: "RGLGuy" }),
+          ),
+          getV0ProfileTeams: vi.fn(() =>
+            Promise.reject(new Error("teams down")),
+          ),
         },
       };
 
@@ -80,9 +92,7 @@ describe("fetchLeagues utils", () => {
       };
 
       const page2 = {
-        data: [
-          { team: { id: 12, name: "Team C" }, type: "joined" },
-        ],
+        data: [{ team: { id: 12, name: "Team C" }, type: "joined" }],
         meta: { current_page: 2, last_page: 3 },
         links: { next: "?page=3" },
       };
@@ -98,12 +108,20 @@ describe("fetchLeagues utils", () => {
 
       const client: any = {
         player: {
-          getPlayer: vi.fn(() => Promise.resolve({ player: { steam: { id64: "STEAM64" }, name: "EtfPlayer" } })),
+          getPlayer: vi.fn(() =>
+            Promise.resolve({
+              player: { steam: { id64: "STEAM64" }, name: "EtfPlayer" },
+            }),
+          ),
           getPlayerTransfers: vi.fn((id: string, page = 1) => {
             if (page === 1) return Promise.resolve(page1);
             if (page === 2) return Promise.resolve(page2);
             if (page === 3) return Promise.resolve(page3);
-            return Promise.resolve({ data: [], meta: { current_page: page, last_page: page }, links: { next: null } });
+            return Promise.resolve({
+              data: [],
+              meta: { current_page: page, last_page: page },
+              links: { next: null },
+            });
           }),
         },
       };
@@ -129,21 +147,30 @@ describe("fetchLeagues utils", () => {
 
     it("handles some page fetches failing and still returns concatenated successful pages", async () => {
       const page1 = {
-        data: [
-          { team: { id: 20, name: "X" }, type: "joined" },
-        ],
+        data: [{ team: { id: 20, name: "X" }, type: "joined" }],
         meta: { current_page: 1, last_page: 3 },
         links: { next: "?page=2" },
       };
 
       const client: any = {
         player: {
-          getPlayer: vi.fn(() => Promise.resolve({ player: { steam: { id64: "S" }, name: "P" } })),
+          getPlayer: vi.fn(() =>
+            Promise.resolve({ player: { steam: { id64: "S" }, name: "P" } }),
+          ),
           getPlayerTransfers: vi.fn((id: string, page = 1) => {
             if (page === 1) return Promise.resolve(page1);
             if (page === 2) return Promise.reject(new Error("network"));
-            if (page === 3) return Promise.resolve({ data: [{ team: { id: 21, name: "Y" }, type: "joined" }], meta: { current_page: 3, last_page: 3 }, links: { next: null } });
-            return Promise.resolve({ data: [], meta: { current_page: page, last_page: page }, links: { next: null } });
+            if (page === 3)
+              return Promise.resolve({
+                data: [{ team: { id: 21, name: "Y" }, type: "joined" }],
+                meta: { current_page: 3, last_page: 3 },
+                links: { next: null },
+              });
+            return Promise.resolve({
+              data: [],
+              meta: { current_page: page, last_page: page },
+              links: { next: null },
+            });
           }),
         },
       };
@@ -192,11 +219,17 @@ describe("fetchLeagues utils", () => {
 
       const client: any = {
         team: {
-          getTeam: vi.fn(() => Promise.resolve({ team: { id: 50, name: "T50" } })),
+          getTeam: vi.fn(() =>
+            Promise.resolve({ team: { id: 50, name: "T50" } }),
+          ),
           getTeamTransfers: vi.fn((id: number, page = 1) => {
             if (page === 1) return Promise.resolve(page1);
             if (page === 2) return Promise.resolve(page2);
-            return Promise.resolve({ data: [], meta: { current_page: page, last_page: page }, links: { next: null } });
+            return Promise.resolve({
+              data: [],
+              meta: { current_page: page, last_page: page },
+              links: { next: null },
+            });
           }),
         },
       };
@@ -216,19 +249,37 @@ describe("fetchLeagues utils", () => {
 
     it("handles partial page failures and still returns concatenated players", async () => {
       const page1 = {
-        data: [ { who: { id: 9, name: "X", steam: { id64: "SX" } }, type: "joined" } ],
+        data: [
+          { who: { id: 9, name: "X", steam: { id64: "SX" } }, type: "joined" },
+        ],
         meta: { current_page: 1, last_page: 3 },
         links: { next: "?page=2" },
       };
 
       const client: any = {
         team: {
-          getTeam: vi.fn(() => Promise.resolve({ team: { id: 60, name: "T60" } })),
+          getTeam: vi.fn(() =>
+            Promise.resolve({ team: { id: 60, name: "T60" } }),
+          ),
           getTeamTransfers: vi.fn((id: number, page = 1) => {
             if (page === 1) return Promise.resolve(page1);
             if (page === 2) return Promise.reject(new Error("network"));
-            if (page === 3) return Promise.resolve({ data: [ { who: { id: 10, name: "Y", steam: { id64: "SY" } }, type: "joined" } ], meta: { current_page: 3, last_page: 3 }, links: { next: null } });
-            return Promise.resolve({ data: [], meta: { current_page: page, last_page: page }, links: { next: null } });
+            if (page === 3)
+              return Promise.resolve({
+                data: [
+                  {
+                    who: { id: 10, name: "Y", steam: { id64: "SY" } },
+                    type: "joined",
+                  },
+                ],
+                meta: { current_page: 3, last_page: 3 },
+                links: { next: null },
+              });
+            return Promise.resolve({
+              data: [],
+              meta: { current_page: page, last_page: page },
+              links: { next: null },
+            });
           }),
         },
       };

@@ -8,25 +8,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import GraphViewer from '@@/components/GraphViewer.vue';
-import PathSidebar from '@@/components/PathSidebar.vue';
+import { ref, onMounted } from "vue";
+import GraphViewer from "@@/components/GraphViewer.vue";
+import PathSidebar from "@@/components/PathSidebar.vue";
 
 const graph = ref({ nodes: [], links: [] });
 
 onMounted(async () => {
   try {
     // seed graph with some popular players or sample
-    const res = await $fetch('/api/player/76561198936168937')
-      .catch(() => null);
+    const res = await $fetch("/api/player/76561198936168937").catch(() => null);
 
     if (res && res.found) {
       graph.value.nodes = [
         {
           id: res.player.id,
           name: res.player.rglName || res.player.etf2lName || res.player.id,
-          type: 'player'
-        }
+          type: "player",
+        },
       ];
     }
   } catch (err) {

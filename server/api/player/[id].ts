@@ -2,7 +2,10 @@ import { getDriver } from "@@/server/utils/neo4j";
 import { RglClient } from "~~/server/lib/rgl/RglClient";
 import { Etf2lClient } from "~~/server/lib/etf2l/Etf2lClient";
 import { needsFetch } from "~~/server/utils/needsFetch";
-import { fetchEtf2lExternalData, fetchRglExternalData } from "~~/server/utils/fetchLeagues";
+import {
+  fetchEtf2lExternalData,
+  fetchRglExternalData,
+} from "~~/server/utils/fetchLeagues";
 import { fetchAvatarUrl } from "~~/server/utils/fetchAvatarUrl";
 import { upsertPlayerData, readPlayerData } from "~~/server/utils/playerInfo";
 
@@ -30,9 +33,12 @@ export default defineEventHandler(async (event) => {
         fetchAvatarUrl(id),
       ]);
 
-      const rglProfileVal = rglProfile.status == "fulfilled" ? rglProfile.value : null;
-      const etf2lProfileVal = etf2lProfile.status == "fulfilled" ? etf2lProfile.value : null;
-      const avatarUrlVal = avatarUrl.status == "fulfilled" ? avatarUrl.value : null;
+      const rglProfileVal =
+        rglProfile.status == "fulfilled" ? rglProfile.value : null;
+      const etf2lProfileVal =
+        etf2lProfile.status == "fulfilled" ? etf2lProfile.value : null;
+      const avatarUrlVal =
+        avatarUrl.status == "fulfilled" ? avatarUrl.value : null;
       if (rglProfileVal || etf2lProfileVal) {
         // upsert fetched data
         await upsertPlayerData(session, id, {

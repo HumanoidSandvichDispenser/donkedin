@@ -98,4 +98,3 @@ export async function readPlayerData(session: neo4j.Session, id: string) {
     },
   };
 }
-
