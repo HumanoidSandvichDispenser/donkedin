@@ -34,15 +34,15 @@ describe("player-service", () => {
     (fetchAvatarUrl as any).mockResolvedValue("http://avatar/url");
 
     const svc = new PlayerService(rglService, etf2lService, repo as any);
-    await svc.fetchPlayer("STEAM_1");
+    await svc.fetchPlayer("76561198248436608");
 
-    expect(repo.player.needsFetch).toHaveBeenCalledWith("STEAM_1");
-    expect(rglService.fetchRglPlayerFromApi).toHaveBeenCalledWith("STEAM_1");
+    expect(repo.player.needsFetch).toHaveBeenCalledWith("76561198248436608");
+    expect(rglService.fetchRglPlayerFromApi).toHaveBeenCalledWith("76561198248436608");
     expect(etf2lService.fetchEtf2lPlayerFromApi).toHaveBeenCalledWith(
-      "STEAM_1",
+      "76561198248436608",
     );
     expect(repo.player.upsertPlayerProfile).toHaveBeenCalledWith(
-      "STEAM_1",
+      "76561198248436608",
       { rgl: rglProfile, etf2l: undefined },
       "http://avatar/url",
     );
@@ -62,9 +62,9 @@ describe("player-service", () => {
     (fetchAvatarUrl as any).mockResolvedValue("http://avatar/url");
 
     const svc = new PlayerService(rglService, etf2lService, repo as any);
-    await svc.fetchPlayer("STEAM_2");
+    await svc.fetchPlayer("76561198248436608");
 
-    expect(repo.player.needsFetch).toHaveBeenCalledWith("STEAM_2");
+    expect(repo.player.needsFetch).toHaveBeenCalledWith("76561198248436608");
     expect(rglService.fetchRglPlayerFromApi).not.toHaveBeenCalled();
     expect(etf2lService.fetchEtf2lPlayerFromApi).not.toHaveBeenCalled();
     expect(repo.player.upsertPlayerProfile).not.toHaveBeenCalled();
@@ -75,8 +75,8 @@ describe("player-service", () => {
     repo.player.upsertPlayerProfile = vi.fn().mockResolvedValue(undefined);
     repo.player.needsFetch = vi.fn().mockResolvedValue(true);
 
-    const rglProfile = { id: "rglX" };
-    const etf2lProfile = { id: "etfY" };
+    const rglProfile = { id: "76561198248436608" };
+    const etf2lProfile = { id: "76561198248436608" };
 
     const rglService: any = {
       fetchRglPlayerFromApi: vi.fn().mockResolvedValue(rglProfile),
@@ -88,10 +88,10 @@ describe("player-service", () => {
     (fetchAvatarUrl as any).mockResolvedValue(null);
 
     const svc = new PlayerService(rglService, etf2lService, repo as any);
-    await svc.fetchPlayer("STEAM_3");
+    await svc.fetchPlayer("76561198248436608");
 
     expect(repo.player.upsertPlayerProfile).toHaveBeenCalledWith(
-      "STEAM_3",
+      "76561198248436608",
       { rgl: rglProfile, etf2l: etf2lProfile },
       undefined,
     );
