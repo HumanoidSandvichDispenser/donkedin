@@ -8,11 +8,20 @@ import type {
   Etf2lTeamTransfer,
 } from "~~/clients/lib/etf2l/types";
 import type {
+  IService,
   PlayerProfile,
   PlayerSummary,
   TeamProfile,
   TeamSummary,
 } from "./types";
+
+export default class Etf2lService implements IService<Etf2lClient> {
+  client: Etf2lClient;
+
+  constructor(client: Etf2lClient) {
+    this.client = client;
+  }
+}
 
 export async function fetchEtf2lPlayer(
   client: Etf2lClient,

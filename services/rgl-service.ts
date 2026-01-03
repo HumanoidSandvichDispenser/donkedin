@@ -1,7 +1,6 @@
-import type { RglClient } from "~~/server/lib/rgl/RglClient";
-import type { RglPlayer, RglPlayerTeam, RglSeason } from "~~/server/lib/rgl/types";
+import type { RglClient } from "../clients/rgl/RglClient";
+import type { RglPlayer, RglPlayerTeam, RglSeason, RglTeam } from "../clients/rgl/types";
 import type { IService, PlayerProfile, PlayerSummary, TeamProfile, TeamSummary } from "./types";
-import { needsFetch } from "../server/utils/needsFetch";
 import { Repository } from "../repositories/types";
 
 export default class RglService implements IService<RglClient> {
@@ -13,7 +12,10 @@ export default class RglService implements IService<RglClient> {
     this.repository = repository;
   }
 
-  async fetchRglPlayer(id: string): Promise<PlayerProfile | null> {
+  /**
+   * Fetches an RGL player from RGL's public API.
+   */
+  async fetchRglPlayerFromApi(id: string): Promise<PlayerProfile | null> {
     let rglProfile: RglPlayer | null = null;
     let rglTeams: RglPlayerTeam[] = [];
 
@@ -36,32 +38,58 @@ export default class RglService implements IService<RglClient> {
     }
 
     const teams: TeamSummary[] = rglTeams.map((t) => ({
-      teamId: t.teamId,
-      teamName: t.teamName,
+      id: t.teamId,
+      name: t.teamName,
     }));
 
     return {
-      steamId: rglProfile.steamId,
+      id: rglProfile.steamId,
       name: rglProfile.name,
       teams,
     };
   };
 
   /**
-   * Fetches an RGL team from the database or directly from RGL's public API
-   * if it does not exist or is stale.
+   * Fetches an RGL team directly from RGL's public API.
    */
-  async fetchRglTeam(id: Number): Promise<TeamProfile | null> {
-    const shouldFetch = await this.repository.team.rgl.needsFetch(id);
-    if (shouldFetch) {
-      const rglTeam = await this.client.teams.getV0Teams(id.toString());
-      if (rglTeam) {
+  async fetchRglTeamFromApi(id: number): Promise<TeamProfile | null> {
+    try {
+      const team = await this.client.teams.getV0Teams(id) as RglTeam;
 
-      }
+      return {
+        id: team.teamId,
+        tag: team.tag,
+        name: team.name,
+        players: team.players.map((p) => ({
+          id: p.steamId,
+          name: p.name,
+        })),
+      };
+    } catch (e) {
+      // on failure return null
+      return null;
     }
   };
 
-  async fetchRglSeason(seasonId: number): Promise<RglSeason | null> => {
+  /**
+   * Fetches an RGL season from the database or directly from RGL's public API
+   * if it does not exist.
+   */
+  async fetchRglSeason(seasonId: number): Promise<RglSeason | null> {
+    // read from database first
+    let season = await this.repository.rglSeason.getSeason(seasonId);
 
+    // fetch if not found in database
+    if (!season) {
+      const res = await this.client.seasons.getV0Seasons(seasonId);
+      season = res as RglSeason;
+
+      if (season) {
+        // store in database
+        this.repository.rglSeason.putSeason(seasonId, season);
+      }
+    }
+
+    return season;
   }
 }

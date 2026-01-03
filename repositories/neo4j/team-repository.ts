@@ -6,9 +6,9 @@ abstract class Neo4jTeamRepository
   extends Neo4jRepository
   implements LeagueTeamRepository
 {
-  abstract needsFetch(id: Number): Promise<boolean>;
+  abstract needsFetch(id: number): Promise<boolean>;
 
-  abstract getTeamWithPlayersById(id: Number): Promise<TeamWithPlayers | null>;
+  abstract getTeamWithPlayersById(id: number): Promise<TeamWithPlayers | null>;
 
   abstract upsertTeamProfile(team: TeamProfile): Promise<void>;
 }

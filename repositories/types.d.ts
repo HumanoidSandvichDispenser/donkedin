@@ -1,3 +1,4 @@
+import { RglSeason } from "../clients/rgl/types";
 import type {
   PlayerProfile,
   PlayerSummary,
@@ -51,9 +52,9 @@ export interface TeamWithPlayers {
 }
 
 export interface LeagueTeamRepository {
-  needsFetch(id: Number): Promise<boolean>;
+  needsFetch(id: number): Promise<boolean>;
 
-  getTeamWithPlayersById(id: Number): Promise<TeamWithPlayers | null>;
+  getTeamWithPlayersById(id: number): Promise<TeamWithPlayers | null>;
 
   upsertTeamProfile(team: TeamProfile): Promise<void>;
 }
@@ -63,7 +64,14 @@ export interface TeamRepository {
   etf2l: LeagueTeamRepository;
 }
 
+export interface RglSeasonRepository {
+  getSeason(id: number): Promise<RglSeason | null>;
+
+  putSeason(id: number, season: RglSeason): Promise<void>;
+}
+
 export interface Repository {
   player: PlayerRepository;
   team: TeamRepository;
+  rglSeason: RglSeasonRepository;
 }
