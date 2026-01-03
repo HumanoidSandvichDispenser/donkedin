@@ -83,6 +83,7 @@ const props = defineProps<{
   padding: 8px;
   border-radius: 8px;
   flex-direction: row;
+  font-weight: 500;
   width: 100%;
   gap: 12px;
 }
