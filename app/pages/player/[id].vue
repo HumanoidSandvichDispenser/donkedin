@@ -19,7 +19,6 @@
 
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import GraphViewer from "@/components/GraphViewer.vue";
 import { ref, onMounted } from "vue";
 
 const route = useRoute();
