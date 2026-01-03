@@ -115,13 +115,13 @@ export default class Neo4jPlayerRepository
           p.lastUpdated = datetime()
       WITH p
       UNWIND $rglTeams AS rt
-        MERGE (t:RglTeam {id: rt.teamId})
-        SET t.name = rt.teamName
+        MERGE (t:RglTeam {id: rt.id})
+        SET t.name = rt.name
         MERGE (p)-[:MEMBER_OF]->(t)
       WITH p
       UNWIND $etf2lTeams AS et
-        MERGE (t2:Etf2lTeam {id: et.teamId})
-        SET t2.name = et.teamName
+        MERGE (t2:Etf2lTeam {id: et.id})
+        SET t2.name = et.name
         MERGE (p)-[:MEMBER_OF]->(t2)
       RETURN p
     `;

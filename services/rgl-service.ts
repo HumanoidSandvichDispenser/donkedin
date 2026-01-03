@@ -1,6 +1,17 @@
 import type { RglClient } from "../clients/rgl/RglClient";
-import type { RglPlayer, RglPlayerTeam, RglSeason, RglTeam } from "../clients/rgl/types";
-import type { IService, PlayerProfile, PlayerSummary, TeamProfile, TeamSummary } from "./types";
+import type {
+  RglPlayer,
+  RglPlayerTeam,
+  RglSeason,
+  RglTeam,
+} from "../clients/rgl/types";
+import type {
+  IService,
+  PlayerProfile,
+  PlayerSummary,
+  TeamProfile,
+  TeamSummary,
+} from "./types";
 import { Repository } from "../repositories/types";
 
 export default class RglService implements IService<RglClient> {
@@ -47,14 +58,14 @@ export default class RglService implements IService<RglClient> {
       name: rglProfile.name,
       teams,
     };
-  };
+  }
 
   /**
    * Fetches an RGL team directly from RGL's public API.
    */
   async fetchRglTeamFromApi(id: number): Promise<TeamProfile | null> {
     try {
-      const team = await this.client.teams.getV0Teams(id) as RglTeam;
+      const team = (await this.client.teams.getV0Teams(id)) as RglTeam;
 
       return {
         id: team.teamId,
@@ -69,7 +80,7 @@ export default class RglService implements IService<RglClient> {
       // on failure return null
       return null;
     }
-  };
+  }
 
   /**
    * Fetches an RGL season from the database or directly from RGL's public API
@@ -91,5 +102,32 @@ export default class RglService implements IService<RglClient> {
     }
 
     return season;
+  }
+
+  async getTeam(id: number) {
+    const shouldFetch = await this.repository.team.rgl.needsFetch(id);
+    if (shouldFetch) {
+      try {
+        const team = (await this.client.teams.getV0Teams(id)) as RglTeam;
+        if (team) {
+          const season = await this.fetchRglSeason(team.seasonId);
+          const profile: any = {
+            teamId: team.teamId,
+            tag: team.tag,
+            name: team.name,
+            players: team.players.map((p) => ({ id: p.steamId, name: p.name })),
+            divisionName: team.divisionName,
+            seasonId: team.seasonId,
+            seasonName: season?.name ?? null,
+            formatName: season?.formatName ?? null,
+          };
+          await this.repository.team.rgl.upsertTeamProfile(profile as any);
+        }
+      } catch (e) {
+        // ignore API failures here
+      }
+    }
+
+    return this.repository.team.rgl.getTeamWithPlayersById(id);
   }
 }
