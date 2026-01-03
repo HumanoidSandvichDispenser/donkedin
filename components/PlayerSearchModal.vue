@@ -23,13 +23,9 @@
       <div class="status muted-text">
         <div v-if="loading">Searching...</div>
         <div v-if="error" class="error">{{ error }}</div>
-      </div>
-
-      <div v-if="isSteamId && !loading" class="steam-direct muted-text">
-        <p>Detected SteamID64. Fetching player directly...</p>
-      </div>
-
-      <div v-if="!isSteamId">
+        <div v-if="results.length > 0 && !loading">
+          {{ resultsText }}
+        </div>
         <div
           v-if="results.length === 0 && !loading"
           class="no-results muted-text"
@@ -37,7 +33,13 @@
           No results. Try inputting the exact SteamID64 to select a specific
           player.
         </div>
+      </div>
 
+      <div v-if="isSteamId && !loading" class="steam-direct muted-text">
+        <p>Detected SteamID64. Fetching player directly...</p>
+      </div>
+
+      <div v-if="!isSteamId">
         <ul class="results">
           <li v-for="p in results" :key="p.id" class="result-item">
             <div class="select-actions">
@@ -72,6 +74,7 @@
 import { ref, computed, watch, computed as _computed, nextTick } from "vue";
 import TeammateCard from "./TeammateCard.vue";
 import GenericModal from "./GenericModal.vue";
+import pluralize from "pluralize";
 
 const props = defineProps<{ modelValue?: boolean }>();
 const emit = defineEmits(["update:modelValue", "select", "close"]);
@@ -114,6 +117,11 @@ watch(
   },
 );
 
+const resultsText = computed(() => {
+  const resultCount = results.value.length;
+  return `${resultCount} ${pluralize("result", resultCount)}`;
+});
+
 async function doSearch() {
   error.value = null;
   results.value = [];
@@ -128,10 +136,8 @@ async function doSearch() {
 
   loading.value = true;
   try {
-    const res = await fetch(`/api/player/search?q=${encodeURIComponent(q)}`);
-    if (!res.ok) throw new Error(`Search failed: ${res.status}`);
-    const body = await res.json();
-    results.value = body.players || [];
+    const response = await $fetch(`/api/player/search?q=${encodeURIComponent(q)}&limit=25`);
+    results.value = response.players;
   } catch (err: any) {
     console.error(err);
     error.value = err?.message || String(err);
@@ -148,9 +154,7 @@ async function fetchAndEmit(id: string) {
   selectedLoading.value = true;
   error.value = null;
   try {
-    const res = await fetch(`/api/player/${encodeURIComponent(id)}`);
-    if (!res.ok) throw new Error(`Fetch player failed: ${res.status}`);
-    const body = await res.json();
+    const body = await $fetch(`/api/player/${encodeURIComponent(id)}`);
     // close the modal via v-model and emit selection
     emit("update:modelValue", false);
     emit("select", body);
