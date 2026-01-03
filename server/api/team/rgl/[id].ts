@@ -64,6 +64,8 @@ async function readRglTeam(session: neo4j.Session, id: Number) {
     name: tNode.properties.name ?? null,
     tag: tNode.properties.tag ?? null,
     lastUpdated: tNode.properties.lastUpdated ?? null,
+    seasonName: tNode.properties.seasonName ?? null,
+    divisionName: tNode.properties.divisionName ?? null,
   };
 
   const playersRes = await session.executeRead((tx) =>
