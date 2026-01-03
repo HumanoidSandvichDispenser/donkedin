@@ -1,5 +1,5 @@
 import { getDriver } from "~~/server/utils/neo4j";
-import { searchPlayersByAlias } from "~~/server/utils/playerInfo";
+import createRepository from "~~/repositories/neo4j/create-repository";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event) as Record<string, any>;
@@ -29,7 +29,8 @@ export default defineEventHandler(async (event) => {
   const session = driver.session();
 
   try {
-    const players = await searchPlayersByAlias(session, rawSearch, limit);
+    const repo = createRepository(session);
+    const players = await repo.player.searchPlayersByAlias(rawSearch, limit);
     return { players };
   } catch (error) {
     console.error("Error in player search handler:", error);

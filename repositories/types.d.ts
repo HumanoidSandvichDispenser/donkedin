@@ -6,7 +6,6 @@ import type {
   TeamSummary,
 } from "../services/types";
 
-
 export interface PlayerNode {
   id: string;
   lastUpdated: string;
@@ -20,7 +19,7 @@ export interface PlayerWithTeams {
   teams: {
     rgl: TeamSummary[];
     etf2l: TeamSummary[];
-  }
+  };
 }
 
 export interface PlayerRepository {
@@ -30,12 +29,19 @@ export interface PlayerRepository {
 
   searchPlayersByAlias(alias: string, limit?: number): Promise<PlayerNode[]>;
 
-  upsertPlayerProfile(id: string,
+  findPathBetweenPlayers(
+    srcId: string,
+    tgtId: string,
+  ): Promise<{ nodes: any[]; segments: any[] }>;
+
+  upsertPlayerProfile(
+    id: string,
     profiles: {
       rgl?: PlayerProfile;
       etf2l?: PlayerProfile;
     },
-    avatarUrl?: string): Promise<void>;
+    avatarUrl?: string,
+  ): Promise<void>;
 }
 
 export interface TeamNode {

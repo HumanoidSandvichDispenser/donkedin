@@ -18,3 +18,43 @@ export function getDriver(): neo4j.Driver {
 
   return driver;
 }
+
+export function convertNeo4jValue(v: any): any {
+  if (neo4j.isInt(v)) {
+    return v.toNumber();
+  }
+
+  if (Array.isArray(v)) {
+    return v.map(convertNeo4jValue);
+  }
+
+  if (v && typeof v === "object") {
+    const out: any = {};
+    for (const k of Object.keys(v)) {
+      out[k] = convertNeo4jValue(v[k]);
+    }
+    return out;
+  }
+  return v;
+}
+
+export function serializeNode(node: any) {
+  return {
+    id: neo4j.isInt(node.identity)
+      ? node.identity.toNumber()
+      : node.identity,
+    labels: node.labels,
+    properties: convertNeo4jValue(node.properties ?? {}),
+  };
+}
+
+export function serializeRelationship(rel: any) {
+  return {
+    id: neo4j.isInt(rel.identity) ? rel.identity.toNumber() : rel.identity,
+    type: rel.type,
+    start: neo4j.isInt(rel.start) ? rel.start.toNumber() : rel.start,
+    end: neo4j.isInt(rel.end) ? rel.end.toNumber() : rel.end,
+    properties: convertNeo4jValue(rel.properties ?? {}),
+  };
+}
+

@@ -49,7 +49,6 @@ export const useGraphStore = defineStore("graph", () => {
     try {
       if (type === "player") {
         const res: any = await fetcher(`/api/player/${origId}`);
-        if (!res?.found) return;
         const playerNode = {
           id: res.player.id,
           name: res.player.rglName || res.player.etf2lName || res.player.id,
@@ -58,7 +57,7 @@ export const useGraphStore = defineStore("graph", () => {
         addNodeIfMissing(playerNode);
         const teams = res.teams || {};
         for (const t of teams.rgl || []) {
-          const teamNode = { id: t.teamId, name: t.teamName, type: "rgl" };
+          const teamNode = { id: t.id, name: t.name, type: "rgl" };
           addNodeIfMissing(teamNode);
           addEdgeIfMissing(playerNode, teamNode, 1);
         }
@@ -69,7 +68,6 @@ export const useGraphStore = defineStore("graph", () => {
         }
       } else if (type === "rgl") {
         const res: any = await fetcher(`/api/team/rgl/${origId}`);
-        if (!res?.found) return;
         const team = res.team;
         const teamNode = { id: team.id, name: team.name, type: "rgl" };
         addNodeIfMissing(teamNode);
@@ -80,7 +78,6 @@ export const useGraphStore = defineStore("graph", () => {
         }
       } else if (type === "etf2l") {
         const res: any = await fetcher(`/api/team/etf2l/${origId}`);
-        if (!res?.found) return;
         const team = res.team;
         const teamNode = { id: team.id, name: team.name, type: "etf2l" };
         addNodeIfMissing(teamNode);
@@ -130,13 +127,20 @@ export const useGraphStore = defineStore("graph", () => {
   }
 
   async function loadPath(a: string, b: string) {
-    if (!a || !b) return;
+    if (!a || !b) {
+      return;
+    }
+
     const params = new URLSearchParams();
     params.set("a", a.trim());
     params.set("b", b.trim());
+
     try {
       const res: any = await fetcher(`/api/player/path?${params.toString()}`);
-      if (!res?.found || !Array.isArray(res.nodes)) return;
+
+      if (res.nodes.length == 0) {
+        return;
+      }
 
       // add nodes
       for (const n of res.nodes) {

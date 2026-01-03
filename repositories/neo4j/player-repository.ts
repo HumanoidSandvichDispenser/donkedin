@@ -2,6 +2,7 @@ import { PlayerProfile } from "../../services/types";
 import { PlayerNode, PlayerRepository, PlayerWithTeams } from "../types";
 import { Neo4jRepository } from "./repository";
 import neo4j from "neo4j-driver";
+import { serializeNode } from "~~/server/utils/neo4j";
 
 export default class Neo4jPlayerRepository
   extends Neo4jRepository
@@ -69,7 +70,10 @@ export default class Neo4jPlayerRepository
     };
   }
 
-  async searchPlayersByAlias(alias: string, limit: number = 25): Promise<PlayerNode[]> {
+  async searchPlayersByAlias(
+    alias: string,
+    limit: number = 25,
+  ): Promise<PlayerNode[]> {
     const query = `
       CALL db.index.fulltext.queryNodes("playerNames", $alias + "*") YIELD node, score
       RETURN node, score
@@ -136,5 +140,44 @@ export default class Neo4jPlayerRepository
     };
 
     await this.session.executeWrite((tx) => tx.run(writeQuery, params));
+  }
+
+  async findPathBetweenPlayers(
+    srcId: string,
+    tgtId: string,
+  ): Promise<{ nodes: any[]; segments: any[] }> {
+    const cypher = `MATCH (source:Player {id: $a}), (target:Player {id: $b})
+      MATCH p = shortestPath(
+        (source)-[*..20]-(target)
+      )
+      WHERE NONE(n IN nodes(p) WHERE (n:RglTeam AND n.tag = \"FA\"))
+      RETURN p, nodes(p) as nodes`;
+
+    const res = await this.session.executeRead((tx) =>
+      tx.run(cypher, { a: srcId, b: tgtId }),
+    );
+
+    if (!res.records || res.records.length === 0) {
+      return { nodes: [], segments: [] };
+    }
+
+    const path = res.records[0].get("p");
+    const nodes = res.records[0].get("nodes");
+
+    // serialize nodes and segments similar to API handler
+    const nodesOut = nodes.map(serializeNode);
+
+    const segmentsRaw = path.segments ?? [];
+    const segmentsOut = segmentsRaw.map((seg: any) => {
+      const start = serializeNode(seg.start);
+      const end = serializeNode(seg.end);
+      return {
+        start,
+        end,
+        type: seg.relationship ? seg.relationship.type : null,
+      };
+    });
+
+    return { nodes: nodesOut, segments: segmentsOut };
   }
 }

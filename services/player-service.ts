@@ -28,7 +28,14 @@ export default class PlayerService {
   async fetchPlayer(id: string) {
     const shouldFetch = await this.repository.player.needsFetch(id);
 
-    if (!shouldFetch) return;
+    if (!shouldFetch) {
+      return;
+    }
+
+    // check if steam id (starts with 7656, 17 digits)
+    if (!/^7656\d{13}$/.test(id)) {
+      throw new Error("Invalid Steam ID");
+    }
 
     const [rglProfile, etf2lProfile, avatarUrl] = await Promise.allSettled([
       this.rglService.fetchRglPlayerFromApi(id),
