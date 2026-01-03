@@ -102,6 +102,7 @@ button,
   background: var(--surface-0);
   color: var(--text);
   cursor: pointer;
+  font-weight: 500;
   transition:
     transform 120ms ease,
     filter 120ms ease;
