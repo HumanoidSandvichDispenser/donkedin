@@ -1,15 +1,19 @@
 import type { RglClient } from "~~/server/lib/rgl/RglClient";
-import type { RglPlayer, RglPlayerTeam } from "~~/server/lib/rgl/types";
+import type { RglPlayer, RglPlayerTeam, RglSeason } from "~~/server/lib/rgl/types";
 import type { IService, PlayerProfile, PlayerSummary, TeamProfile, TeamSummary } from "./types";
+import { needsFetch } from "../server/utils/needsFetch";
+import { Repository } from "../repositories/types";
 
 export default class RglService implements IService<RglClient> {
   client: RglClient;
+  repository: Repository;
 
-  constructor(client: RglClient) {
+  constructor(client: RglClient, repository: Repository) {
     this.client = client;
+    this.repository = repository;
   }
 
-  fetchRglPlayer = async (id: string): Promise<PlayerProfile | null> => {
+  async fetchRglPlayer(id: string): Promise<PlayerProfile | null> {
     let rglProfile: RglPlayer | null = null;
     let rglTeams: RglPlayerTeam[] = [];
 
@@ -47,11 +51,17 @@ export default class RglService implements IService<RglClient> {
    * Fetches an RGL team from the database or directly from RGL's public API
    * if it does not exist or is stale.
    */
-  fetchRglTeam = async (id: Number): Promise<TeamProfile | null> => {
-    const team = await this.client.teams.getV0Teams(id);
+  async fetchRglTeam(id: Number): Promise<TeamProfile | null> {
+    const shouldFetch = await this.repository.team.rgl.needsFetch(id);
+    if (shouldFetch) {
+      const rglTeam = await this.client.teams.getV0Teams(id.toString());
+      if (rglTeam) {
 
-    if (team) {
-
+      }
     }
   };
+
+  async fetchRglSeason(seasonId: number): Promise<RglSeason | null> => {
+
+  }
 }

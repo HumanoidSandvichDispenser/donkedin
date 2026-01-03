@@ -1,41 +1,39 @@
 export interface IService<TClient> {
-    client: TClient;
+  client: TClient;
 }
 
 /**
  * Contains a summary of team information, typically used in PlayerProfiles.
  */
 export interface TeamSummary {
-  teamId: number;
-  teamName: string;
+  id: number;
+  name: string;
 }
 
 /**
- * Contains full information of a player.
+ * Contains full information of a player for a particular league.
  */
 export interface PlayerProfile {
-  steamId: string;
+  id: string;
   name: string;
   teams: TeamSummary[];
   avatarUrl?: string | null;
 }
 
 /**
- * Contains summary information about a player and their participation in a
- * team, used in TeamProfiles.
+ * Contains summary information about a player.
  */
 export interface PlayerSummary {
-  steamId: string;
+  id: string;
   name: string;
-  competition?: string | null;
 }
 
 /**
  * Contains full information of a team.
  */
 export interface TeamProfile {
-  teamId: number;
-  teamTag: string;
-  teamName: string;
+  id: number;
+  tag: string;
+  name: string;
   players: PlayerSummary[];
 }

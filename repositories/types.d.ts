@@ -1,36 +1,66 @@
-export interface Player {
+import type {
+  PlayerProfile,
+  PlayerSummary,
+  TeamProfile,
+  TeamSummary,
+} from "../services/types";
+
+
+export interface PlayerNode {
   id: string;
+  lastUpdated: string;
+  rglName?: string;
+  etf2lName?: string;
+  avatarUrl?: string;
+}
+
+export interface PlayerWithTeams {
+  player: PlayerNode;
+  teams: {
+    rgl: TeamSummary[];
+    etf2l: TeamSummary[];
+  }
 }
 
 export interface PlayerRepository {
-  getPlayerById(id: string): Promise<Player | null>;
+  needsFetch(id: string): Promise<boolean>;
 
-  getPlayersByIds(ids: string[]): Promise<Player[]>;
+  getPlayerWithTeamsById(id: string): Promise<PlayerWithTeams | null>;
 
-  searchPlayersByAlias(alias: string, limit?: number): Promise<Player[]>;
+  searchPlayersByAlias(alias: string, limit?: number): Promise<PlayerNode[]>;
 
-  upsertPlayer(player: Player): Promise<void>;
+  upsertPlayerProfile(id: string,
+    profiles: {
+      rgl?: PlayerProfile;
+      etf2l?: PlayerProfile;
+    },
+    avatarUrl?: string): Promise<void>;
 }
 
-export interface Team {
-  id: number;
-  name: string;
+export interface TeamNode {
+  id: string;
+  lastUpdated: string;
   tag?: string;
-  seasonName?: string;
   divisionName?: string;
+  seasonName?: string;
 }
 
-interface LeagueTeamRepository<TTeam extends Team> {
-  getTeamById(id: string): Promise<TTeam | null>;
+export interface TeamWithPlayers {
+  team: TeamNode;
+  players: PlayerSummary[];
+}
 
-  getTeamsByIds(ids: string[]): Promise<TTeam[]>;
+export interface LeagueTeamRepository {
+  needsFetch(id: Number): Promise<boolean>;
 
-  upsertTeam(team: TTeam): Promise<void>;
+  getTeamWithPlayersById(id: Number): Promise<TeamWithPlayers | null>;
+
+  upsertTeamProfile(team: TeamProfile): Promise<void>;
 }
 
 export interface TeamRepository {
-  rgl: LeagueTeamRepository<Team>;
-  etf2l: LeagueTeamRepository<Team>;
+  rgl: LeagueTeamRepository;
+  etf2l: LeagueTeamRepository;
 }
 
 export interface Repository {
