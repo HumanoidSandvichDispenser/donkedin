@@ -1,78 +1,20 @@
-import type { RglClient } from "~~/server/lib/rgl/RglClient";
-import type { RglPlayer, RglPlayerTeam } from "~~/server/lib/rgl/types";
-import type { Etf2lClient } from "~~/server/lib/etf2l/Etf2lClient";
 import type {
+  Etf2lClient,
   Etf2lPlayer,
   Etf2lPlayerTransferResponse,
   Etf2lPlayerTransfer,
   Etf2lTeam,
   Etf2lTeamTransferResponse,
   Etf2lTeamTransfer,
-} from "~~/server/lib/etf2l/types";
+} from "~~/clients/lib/etf2l/types";
+import type {
+  PlayerProfile,
+  PlayerSummary,
+  TeamProfile,
+  TeamSummary,
+} from "./types";
 
-export interface TeamSummary {
-  teamId: number;
-  teamName: string;
-}
-
-export interface PlayerProfile {
-  steamId: string;
-  name: string;
-  teams: TeamSummary[];
-  avatarUrl?: string | null;
-}
-
-export interface PlayerSummary {
-  steamId: string;
-  name: string;
-  competition?: string | null;
-}
-
-export interface TeamProfile {
-  teamId: number;
-  teamTag: string;
-  teamName: string;
-  players: PlayerSummary[];
-}
-
-export async function fetchRglExternalData(
-  client: RglClient,
-  id: string,
-): Promise<PlayerProfile | null> {
-  let rglProfile: RglPlayer | null = null;
-  let rglTeams: RglPlayerTeam[] = [];
-
-  try {
-    const profile = await client.profile.getV0Profile(id);
-    rglProfile = profile as RglPlayer;
-  } catch (e) {
-    // profile failed; return defaults
-    return null;
-  }
-
-  if (rglProfile) {
-    try {
-      const teams = await client.profile.getV0ProfileTeams(id);
-      rglTeams = teams as RglPlayerTeam[];
-    } catch (e) {
-      // on failure keep teams empty
-      rglTeams = [];
-    }
-  }
-
-  const teams: TeamSummary[] = rglTeams.map((t) => ({
-    teamId: t.teamId,
-    teamName: t.teamName,
-  }));
-
-  return {
-    steamId: rglProfile.steamId,
-    name: rglProfile.name,
-    teams,
-  };
-}
-
-export async function fetchEtf2lExternalData(
+export async function fetchEtf2lPlayer(
   client: Etf2lClient,
   id: string,
 ): Promise<PlayerProfile | null> {
