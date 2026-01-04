@@ -58,7 +58,7 @@ const displayName = computed(() => {
 onMounted(async () => {
   loaded.value = false;
   try {
-    const res = await $fetch(`/api/players/${id}/details`);
+    const res = await $fetch(`/api/players/id/${id}/details`);
     if (res) {
       found.value = true;
       player.value = res.player ?? null;

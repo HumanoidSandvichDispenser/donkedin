@@ -40,7 +40,7 @@ const hasMore = ref(false);
 async function fetchPage(p: number) {
   loading.value = true;
   try {
-    const res = await $fetch(`/api/players/${props.playerId}/details`, {
+    const res = await $fetch(`/api/players/id/${props.playerId}/details`, {
       params: { page: p },
     });
     if (res && Array.isArray(res.teammates)) {
