@@ -1,4 +1,4 @@
-import { RglSeason } from "../clients/rgl/types";
+import type { RglSeason } from "../clients/rgl/types";
 import type {
   PlayerProfile,
   PlayerSummary,

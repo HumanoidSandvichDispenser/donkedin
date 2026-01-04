@@ -14,5 +14,14 @@
     {
       "path": "./.nuxt/tsconfig.node.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "paths": {
+      "~~/*": "*",
+      "~/*": "app/*"
+    },
+    "types": [
+      "neo4j.Driver"
+    ]
+  }
 }

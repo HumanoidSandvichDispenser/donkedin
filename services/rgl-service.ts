@@ -8,11 +8,10 @@ import type {
 import type {
   IService,
   PlayerProfile,
-  PlayerSummary,
   TeamProfile,
   TeamSummary,
 } from "./types";
-import { Repository } from "../repositories/types";
+import type { Repository } from "../repositories/types";
 
 export default class RglService implements IService<RglClient> {
   client: RglClient;
@@ -33,7 +32,7 @@ export default class RglService implements IService<RglClient> {
     try {
       const profile = await this.client.profile.getV0Profile(id);
       rglProfile = profile as RglPlayer;
-    } catch (e) {
+    } catch {
       // profile failed; return defaults
       return null;
     }
@@ -42,7 +41,7 @@ export default class RglService implements IService<RglClient> {
       try {
         const teams = await this.client.profile.getV0ProfileTeams(id);
         rglTeams = teams as RglPlayerTeam[];
-      } catch (e) {
+      } catch {
         // on failure keep teams empty
         rglTeams = [];
       }
@@ -76,7 +75,7 @@ export default class RglService implements IService<RglClient> {
           name: p.name,
         })),
       };
-    } catch (e) {
+    } catch {
       // on failure return null
       return null;
     }
@@ -123,7 +122,7 @@ export default class RglService implements IService<RglClient> {
           };
           await this.repository.team.rgl.upsertTeamProfile(profile as any);
         }
-      } catch (e) {
+      } catch {
         // ignore API failures here
       }
     }

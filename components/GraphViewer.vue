@@ -1,18 +1,18 @@
 <template>
   <div class="graph-viewer">
-    <div ref="container" class="graph-container"></div>
+    <div ref="container" class="graph-container"/>
 
     <div class="floating-controls">
-      <button class="btn" @click="openAddModal" title="Add player">＋</button>
+      <button class="btn" title="Add player" @click="openAddModal">＋</button>
       <button
         class="btn"
-        @click="removeSelectedNode"
         :disabled="!graph.selectedNode"
         title="Remove selected node"
+        @click="removeSelectedNode"
       >
         −
       </button>
-      <button class="btn" @click="openFindModal" title="Find node">🔍</button>
+      <button class="btn" title="Find node" @click="openFindModal">🔍</button>
     </div>
 
     <PlayerSearchModal
@@ -24,7 +24,7 @@
     <div v-if="showFindModal" class="find-modal-overlay">
       <div class="find-modal">
         <div class="form-row">
-          <input v-model="filterText" placeholder="Search nodes..." />
+          <input v-model="filterText" placeholder="Search nodes..." >
           <button class="btn" @click="closeFindModal">Close</button>
         </div>
         <div class="node-list">
@@ -57,7 +57,6 @@ const props = defineProps<{ initialGraph?: { nodes: any[]; links: any[] } }>();
 
 const container = ref<HTMLDivElement | null>(null);
 let cy: cytoscape.Core | null = null;
-let liveLayout: any = null;
 
 const graph = useGraphStore();
 
@@ -126,7 +125,7 @@ function syncStoreToCy() {
     } else {
       cy.elements().removeClass("selected");
     }
-  } catch (err) {
+  } catch {
     /* ignore */
   }
 }
@@ -257,12 +256,12 @@ function setupCy(initial?: { nodes: any[]; links: any[] }) {
             // bring selected node to front for visibility
             try {
               el.move({ parent: null });
-            } catch (e) {
+            } catch {
               /* ignore */
             }
           }
         }
-      } catch (err) {
+      } catch {
         /* ignore */
       }
     },
@@ -324,15 +323,15 @@ function centerNode(origId: string, type: string = "player") {
           { fit: { eles: nodes[0], padding: 400 } },
           { duration: 450 },
         );
-      } catch (e) {
+      } catch {
         cy.fit(nodes[0], 80);
       }
     }
-  } catch (err) {
+  } catch {
     try {
       const nodes = cy.nodes();
       if (nodes && nodes.length) cy.fit(nodes[0], 80);
-    } catch (e) {
+    } catch {
       /* ignore */
     }
   }
@@ -343,7 +342,6 @@ onMounted(() => setupCy(props.initialGraph));
 // floating control state
 const showAddModal = ref(false);
 const showFindModal = ref(false);
-const loading = ref(false);
 const filterText = ref("");
 
 function openAddModal() {
@@ -385,7 +383,7 @@ async function onAddSelected(res: any) {
       setTimeout(() => {
         centerNode(String(player.id), "player");
       }, 350);
-    } catch (err) {
+    } catch {
       // fall back to immediate centering
       centerNode(String(player.id), "player");
     }
@@ -451,7 +449,7 @@ function jumpToNode(n: any) {
       if (el && el.length) {
         cy.animate({ fit: { eles: el, padding: 200 } }, { duration: 350 });
       }
-    } catch (err) {
+    } catch {
       /* ignore */
     }
   }

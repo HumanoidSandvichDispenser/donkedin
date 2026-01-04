@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-const fetcher = (url: string, opts: any = {}) =>
-  $fetch(url, opts).catch((e: any) => {
+const fetcher = (url: string, opts?: any): Promise<unknown> =>
+  $fetch(url, opts).catch((e) => {
     throw e;
   });
 
@@ -39,10 +39,6 @@ export const useGraphStore = defineStore("graph", () => {
     if (!links.value.find((e) => e.id === edgeId)) {
       links.value.push({ id: edgeId, source: sid, target: tid, weight });
     }
-  }
-
-  function removeEdgeById(edgeId: string) {
-    links.value = links.value.filter((e) => makeNodeId(e) != edgeId);
   }
 
   async function expandNodeById(origId: string, type: string) {

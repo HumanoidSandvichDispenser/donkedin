@@ -1,5 +1,5 @@
-import { PlayerProfile } from "../../services/types";
-import { PlayerNode, PlayerRepository, PlayerWithTeams } from "../types";
+import type { PlayerProfile } from "../../services/types";
+import type { PlayerNode, PlayerRepository, PlayerWithTeams } from "../types";
 import { Neo4jRepository } from "./repository";
 import neo4j from "neo4j-driver";
 import { serializeNode } from "~~/server/utils/neo4j";
@@ -150,7 +150,7 @@ export default class Neo4jPlayerRepository
       MATCH p = shortestPath(
         (source)-[*..20]-(target)
       )
-      WHERE NONE(n IN nodes(p) WHERE (n:RglTeam AND n.tag = \"FA\"))
+      WHERE NONE(n IN nodes(p) WHERE (n:RglTeam AND n.tag = "FA"))
       RETURN p, nodes(p) as nodes`;
 
     const res = await this.session.executeRead((tx) =>

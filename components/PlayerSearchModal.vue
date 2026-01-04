@@ -9,14 +9,14 @@
         <input
           ref="inputRef"
           v-model="query"
-          @keyup.enter="doSearch"
-          @keydown.esc.prevent="onEsc"
           placeholder="SteamID64 or RGL/ETF2L Alias"
           aria-label="Player search"
-        />
+          @keyup.enter="doSearch"
+          @keydown.esc.prevent="onEsc"
+        >
 
         <div class="actions">
-          <button @click="doSearch" :disabled="loading">Search</button>
+          <button :disabled="loading" @click="doSearch">Search</button>
         </div>
       </div>
 

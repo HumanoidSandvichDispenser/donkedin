@@ -1,6 +1,6 @@
 <template>
   <div class="outer-container">
-    <div class="line"></div>
+    <div class="line"/>
     <div class="inner-container">
       <div class="team-card subtle">
         <div class="league muted-text">
@@ -10,7 +10,7 @@
           <span v-if="team?.seasonName">
             {{ team.seasonName }}
           </span>
-          <span class="muted-text" v-if="team?.divisionName">
+          <span v-if="team?.divisionName" class="muted-text">
             &mdash;
             {{ team.divisionName }}
           </span>
@@ -21,14 +21,14 @@
           </span>
           <span v-if="team?.tag" class="tag-name"> ({{ team?.tag }}) </span>
         </div>
-        <div v-if="team?.divisionName"></div>
+        <div v-if="team?.divisionName"/>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   team: {
     name: string;
     divisionName?: string;

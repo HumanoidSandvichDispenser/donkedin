@@ -2,21 +2,21 @@
   <div class="path-analysis">
     <div class="path-controls">
       <div class="row">
-        <button class="btn card-btn" @click="openSourceModal" type="button">
+        <button class="btn card-btn" type="button" @click="openSourceModal">
           <TeammateCard
             :person="sourcePlayer"
             placeholder-text="Select a source player"
           />
         </button>
 
-        <button class="btn card-btn" @click="openDestModal" type="button">
+        <button class="btn card-btn" type="button" @click="openDestModal">
           <TeammateCard
             :person="destPlayer"
             placeholder-text="Select a destination player"
           />
         </button>
 
-        <button class="btn" @click="handleLoad" :disabled="loading">
+        <button class="btn" :disabled="loading" @click="handleLoad">
           Find Shortest Path
         </button>
       </div>
@@ -32,7 +32,7 @@
       @close="closeDestModal"
     />
     <template v-if="pathPlayers.length">
-      <PathCount :pathPlayers="pathPlayers" />
+      <PathCount :path-players="pathPlayers" />
       <div class="flow">
         <template v-for="(p, idx) in pathPlayers" :key="pKey(p)">
           <div class="flow-item">
@@ -86,7 +86,6 @@ import TeammateCard from "@@/components/TeammateCard.vue";
 import TeamCard from "@@/components/TeamCard.vue";
 import PathCount from "./PathCount.vue";
 import PlayerSearchModal from "@@/components/PlayerSearchModal.vue";
-import GraphIcon from "@/assets/graph.svg?inline";
 
 const graph = useGraphStore();
 const showSourceModal = ref(false);
@@ -94,24 +93,6 @@ const showDestModal = ref(false);
 const loading = ref(false);
 const sourcePlayer = ref<any | null>(null);
 const destPlayer = ref<any | null>(null);
-
-const sourceLabel = computed(() => {
-  if (!sourcePlayer.value) return "";
-  return (
-    sourcePlayer.value.rglName ??
-    sourcePlayer.value.etf2lName ??
-    String(sourcePlayer.value.id)
-  );
-});
-
-const destLabel = computed(() => {
-  if (!destPlayer.value) return "";
-  return (
-    destPlayer.value.rglName ??
-    destPlayer.value.etf2lName ??
-    String(destPlayer.value.id)
-  );
-});
 
 // nodes in the raw path (in order)
 const rawNodes = computed(() => graph.pathInfo?.nodes || []);

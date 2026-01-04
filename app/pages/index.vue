@@ -1,14 +1,13 @@
 <template>
   <div class="page-root">
     <div class="main">
-      <GraphViewer :initialGraph="graph" />
+      <GraphViewer />
     </div>
     <PathSidebar />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
 import GraphViewer from "@@/components/GraphViewer.vue";
 import PathSidebar from "@@/components/PathSidebar.vue";
 </script>

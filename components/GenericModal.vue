@@ -5,8 +5,8 @@
         <slot name="header" />
         <button
           class="icon modal-close"
-          @click="handleClose"
           aria-label="Close"
+          @click="handleClose"
         >
           ✕
         </button>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ modelValue: boolean }>();
+defineProps<{ modelValue: boolean }>();
 const emit = defineEmits(["update:modelValue", "close"]);
 
 function handleClose() {

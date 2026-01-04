@@ -12,7 +12,7 @@
         :alt="person?.name ?? person?.id"
         width="32"
         height="32"
-      />
+      >
       <div v-else class="placeholder-avatar">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +33,7 @@
           person?.rglName ?? person?.etf2lName ?? person?.id ?? placeholderText
         }}
       </div>
-      <div class="aliases" v-if="person">
+      <div v-if="person" class="aliases">
         <span class="alias steam">
           <a
             :href="`https://steamcommunity.com/profiles/${person.id}`"
@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   person: {
     id: string;
     name: string;

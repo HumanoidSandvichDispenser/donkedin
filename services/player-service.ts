@@ -1,6 +1,6 @@
-import { Repository } from "../repositories/types";
-import Etf2lService from "./etf2l-service";
-import RglService from "./rgl-service";
+import type { Repository } from "../repositories/types";
+import type Etf2lService from "./etf2l-service";
+import type RglService from "./rgl-service";
 import { fetchAvatarUrl } from "../server/utils/fetchAvatarUrl";
 
 export default class PlayerService {

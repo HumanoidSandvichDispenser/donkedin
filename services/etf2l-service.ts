@@ -32,7 +32,7 @@ export default class Etf2lService implements IService<Etf2lClient> {
     try {
       const profile = await this.client.player.getPlayer(id);
       etf2lPlayer = profile as Etf2lPlayer;
-    } catch (e) {
+    } catch {
       return null;
     }
 
@@ -67,7 +67,7 @@ export default class Etf2lService implements IService<Etf2lClient> {
           links: { next: null },
           meta: { current_page: current, last_page: lastPage },
         } as Etf2lPlayerTransferResponse;
-      } catch (e) {
+      } catch {
         // keep null on failure
       }
     }
@@ -91,7 +91,7 @@ export default class Etf2lService implements IService<Etf2lClient> {
     try {
       const profile = await this.client.team.getTeam(Number(id));
       etf2lTeam = profile as Etf2lTeam;
-    } catch (e) {
+    } catch {
       return null;
     }
 
@@ -126,7 +126,7 @@ export default class Etf2lService implements IService<Etf2lClient> {
           links: { next: null },
           meta: { current_page: current, last_page: lastPage },
         } as Etf2lTeamTransferResponse;
-      } catch (e) {
+      } catch {
         // keep null on failure
       }
     }

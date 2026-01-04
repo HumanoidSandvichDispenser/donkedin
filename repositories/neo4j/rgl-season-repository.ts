@@ -1,6 +1,6 @@
 import { Neo4jRepository } from "./repository";
 import type { RglSeasonRepository } from "../types";
-import { RglSeason } from "../../clients/rgl/types";
+import type { RglSeason } from "../../clients/rgl/types";
 
 export default class Neo4jRglSeasonRepository
   extends Neo4jRepository

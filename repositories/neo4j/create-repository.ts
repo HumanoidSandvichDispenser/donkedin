@@ -4,7 +4,7 @@ import {
   Neo4jEtf2lTeamRepository,
   Neo4jRglTeamRepository,
 } from "./team-repository";
-import { Repository } from "../types";
+import type { Repository } from "../types";
 
 export default function createRepository(session: Session): Repository {
   return {

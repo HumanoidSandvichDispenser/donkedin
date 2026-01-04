@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+import PlayerService from "../../services/player-service";
+import { createStrictRepositoryMock } from "../utils/strictMock";
+import { fetchAvatarUrl } from "../../server/utils/fetchAvatarUrl";
+
 // mock fetchAvatarUrl module before importing the service
 vi.mock("../../server/utils/fetchAvatarUrl", () => ({
   fetchAvatarUrl: vi.fn(),
 }));
-
-import PlayerService from "../../services/player-service";
-import { createStrictRepositoryMock } from "../utils/strictMock";
-import { fetchAvatarUrl } from "../../server/utils/fetchAvatarUrl";
 
 describe("player-service", () => {
   beforeEach(() => {

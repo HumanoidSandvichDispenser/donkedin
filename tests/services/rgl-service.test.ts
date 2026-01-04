@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { RglClient } from "../../clients/rgl/RglClient";
-import { CancelablePromise } from "../../clients/rgl/core/CancelablePromise";
 import RglService from "../../services/rgl-service";
 import { createStrictRepositoryMock } from "../utils/strictMock";
 

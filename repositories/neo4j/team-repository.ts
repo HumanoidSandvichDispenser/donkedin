@@ -2,6 +2,8 @@ import type { LeagueTeamRepository, TeamWithPlayers } from "../types";
 import type { TeamProfile } from "../../services/types";
 import { Neo4jRepository } from "./repository";
 
+import neo4j from "neo4j-driver";
+
 abstract class Neo4jTeamRepository
   extends Neo4jRepository
   implements LeagueTeamRepository
@@ -13,18 +15,12 @@ abstract class Neo4jTeamRepository
   abstract upsertTeamProfile(team: TeamProfile): Promise<void>;
 }
 
-import neo4j from "neo4j-driver";
-
 function neoIntToNumber(v: any) {
   if (v === undefined || v === null) return null;
   return neo4j.isInt(v) ? (v as neo4j.Integer).toNumber() : v;
 }
 
 export class Neo4jRglTeamRepository extends Neo4jTeamRepository {
-  constructor(session: any) {
-    super(session);
-  }
-
   async needsFetch(id: number): Promise<boolean> {
     return super.needsFetchHelper("RglTeam", id, 3, "id");
   }
@@ -33,9 +29,11 @@ export class Neo4jRglTeamRepository extends Neo4jTeamRepository {
     const teamRes = await this.session.executeRead((tx) =>
       tx.run("MATCH (t:RglTeam {id: $id}) RETURN t", { id }),
     );
-    if (teamRes.records.length === 0) return null;
+    if (teamRes.records.length === 0) {
+      return null;
+    }
 
-    const tNode = teamRes.records[0].get("t");
+    const tNode = teamRes.records[0]!.get("t");
     const team = {
       id: neoIntToNumber(tNode.properties.id),
       name: tNode.properties.name ?? null,
@@ -101,10 +99,6 @@ export class Neo4jRglTeamRepository extends Neo4jTeamRepository {
 }
 
 export class Neo4jEtf2lTeamRepository extends Neo4jTeamRepository {
-  constructor(session: any) {
-    super(session);
-  }
-
   async needsFetch(id: number): Promise<boolean> {
     return super.needsFetchHelper("Etf2lTeam", id, 3, "id");
   }
@@ -113,9 +107,11 @@ export class Neo4jEtf2lTeamRepository extends Neo4jTeamRepository {
     const teamRes = await this.session.executeRead((tx) =>
       tx.run("MATCH (t:Etf2lTeam {id:$id}) RETURN t", { id }),
     );
-    if (teamRes.records.length === 0) return null;
+    if (teamRes.records.length === 0) {
+      return null;
+    }
 
-    const tNode = teamRes.records[0].get("t");
+    const tNode = teamRes.records[0]!.get("t");
     const team = {
       id: neoIntToNumber(tNode.properties.id),
       name: tNode.properties.name ?? null,

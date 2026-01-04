@@ -20,12 +20,13 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router";
 import { ref, onMounted } from "vue";
+import type { PlayerNode } from "~~/repositories/types";
 
 const route = useRoute();
 const id = String(route.params.id || "");
 
-const player = ref<any | null>(null);
-const teammates = ref<any[]>([]);
+const player = ref<PlayerNode | null>(null);
+const teammates = ref<PlayerNode[]>([]);
 const graph = ref({ nodes: [], links: [] });
 const found = ref(false);
 const loaded = ref(false);

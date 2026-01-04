@@ -3,18 +3,18 @@
     <div class="search-controls">
       <div class="row">
         <input
-          class="input full"
           v-model="source"
+          class="input full"
           placeholder="source (steamid64, rgl:alias, etf2l:alias)"
-        />
+        >
       </div>
       <div class="row">
         <input
-          class="input"
           v-model="dest"
+          class="input"
           placeholder="destination (optional)"
-        />
-        <button class="btn" @click="handleLoad" :disabled="loading">
+        >
+        <button class="btn" :disabled="loading" @click="handleLoad">
           Load
         </button>
       </div>
