@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const b = rawB ? String(rawB).trim() : "";
 
   if (!a || !b) {
-    return createError({
+    createError({
       statusCode: 400,
       statusMessage: "Missing source or target (a/b)",
     });
@@ -24,9 +24,6 @@ export default defineEventHandler(async (event) => {
     const repo = createRepository(session);
     const result = await repo.player.findPathBetweenPlayers(a, b);
     return result;
-  } catch (err) {
-    console.error("Error in player path handler:", err);
-    throw createError({ statusCode: 500, statusMessage: "Internal error" });
   } finally {
     await session.close();
   }

@@ -46,6 +46,7 @@ export interface PlayerRepository {
 
 export interface TeamNode {
   id: string;
+  name: string;
   lastUpdated: string;
   tag?: string;
   divisionName?: string;

@@ -1,11 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-const fetcher = (url: string, opts?: any): Promise<unknown> =>
-  $fetch(url, opts).catch((e) => {
-    throw e;
-  });
-
 function makeNodeId(n: { type: string; id: string }) {
   return `${n.type}:${n.id}`;
 }
@@ -41,10 +36,73 @@ export const useGraphStore = defineStore("graph", () => {
     }
   }
 
-  async function expandNodeById(origId: string, type: string) {
+  async function expandNodeById(id: string, type: string) {
     try {
       if (type === "player") {
-        const res: any = await fetcher(`/api/player/${origId}`);
+        const res = await $fetch(`/api/player/[id]`, {
+          params: { id },
+        });
+
+        const playerNode = {
+          id: res.player.id,
+          name: res.player.rglName || res.player.etf2lName || res.player.id,
+          type: "player",
+        };
+
+        addNodeIfMissing(playerNode);
+
+        const teams = res.teams || {};
+
+        for (const t of teams.rgl || []) {
+          const teamNode = { id: t.id, name: t.name, type: "rgl" };
+          addNodeIfMissing(teamNode);
+          addEdgeIfMissing(playerNode, teamNode, 1);
+        }
+
+        for (const t of teams.etf2l || []) {
+          const teamNode = { id: t.id, name: t.name, type: "etf2l" };
+          addNodeIfMissing(teamNode);
+          addEdgeIfMissing(playerNode, teamNode, 1);
+        }
+      } else if (type === "rgl") {
+        const res = await $fetch(`/api/team/rgl/[id]`, {
+          params: { id },
+        });
+
+        const team = res.team;
+        const teamNode = { id: team.id, name: team.name, type: "rgl" };
+        addNodeIfMissing(teamNode);
+
+        for (const p of res.players || []) {
+          const playerNode = { id: p.id, name: p.name, type: "player" };
+          addNodeIfMissing(playerNode);
+          addEdgeIfMissing(playerNode, teamNode, 1);
+        }
+      } else if (type === "etf2l") {
+        const res = await $fetch(`/api/team/etf2l/[id]`, {
+          params: { id },
+        });
+        const team = res.team;
+        const teamNode = { id: team.id, name: team.name, type: "etf2l" };
+        addNodeIfMissing(teamNode);
+        for (const p of res.players || []) {
+          const playerNode = { id: p.id, name: p.name, type: "player" };
+          addNodeIfMissing(playerNode);
+          addEdgeIfMissing(playerNode, teamNode, 1);
+        }
+      }
+    } catch (err) {
+      console.error("Expand node failed", err);
+    }
+  }
+
+  async function loadSourceOnly(steamId: string) {
+    const trimmed = steamId.trim();
+    if (/^\d+$/.test(trimmed)) {
+      try {
+        const res = await $fetch(`/api/player/[id]`, {
+          params: { id: trimmed },
+        });
         const playerNode = {
           id: res.player.id,
           name: res.player.rglName || res.player.etf2lName || res.player.id,
@@ -62,58 +120,7 @@ export const useGraphStore = defineStore("graph", () => {
           addNodeIfMissing(teamNode);
           addEdgeIfMissing(playerNode, teamNode, 1);
         }
-      } else if (type === "rgl") {
-        const res: any = await fetcher(`/api/team/rgl/${origId}`);
-        const team = res.team;
-        const teamNode = { id: team.id, name: team.name, type: "rgl" };
-        addNodeIfMissing(teamNode);
-        for (const p of res.players || []) {
-          const playerNode = { id: p.id, name: p.name, type: "player" };
-          addNodeIfMissing(playerNode);
-          addEdgeIfMissing(playerNode, teamNode, 1);
-        }
-      } else if (type === "etf2l") {
-        const res: any = await fetcher(`/api/team/etf2l/${origId}`);
-        const team = res.team;
-        const teamNode = { id: team.id, name: team.name, type: "etf2l" };
-        addNodeIfMissing(teamNode);
-        for (const p of res.players || []) {
-          const playerNode = { id: p.id, name: p.name, type: "player" };
-          addNodeIfMissing(playerNode);
-          addEdgeIfMissing(playerNode, teamNode, 1);
-        }
-      }
-    } catch (err) {
-      console.error("Expand node failed", err);
-    }
-  }
-
-  async function loadSourceOnly(raw: string) {
-    if (!raw) return;
-    const trimmed = raw.trim();
-    if (/^\d+$/.test(trimmed)) {
-      try {
-        const res: any = await fetcher(`/api/player/${trimmed}`);
-        if (res?.found) {
-          const playerNode = {
-            id: res.player.id,
-            name: res.player.rglName || res.player.etf2lName || res.player.id,
-            type: "player",
-          };
-          addNodeIfMissing(playerNode);
-          const teams = res.teams || {};
-          for (const t of teams.rgl || []) {
-            const teamNode = { id: t.teamId, name: t.teamName, type: "rgl" };
-            addNodeIfMissing(teamNode);
-            addEdgeIfMissing(playerNode, teamNode, 1);
-          }
-          for (const t of teams.etf2l || []) {
-            const teamNode = { id: t.id, name: t.name, type: "etf2l" };
-            addNodeIfMissing(teamNode);
-            addEdgeIfMissing(playerNode, teamNode, 1);
-          }
-          return;
-        }
+        return;
       } catch (e) {
         console.error("Load source failed", e);
       }
@@ -132,7 +139,7 @@ export const useGraphStore = defineStore("graph", () => {
     params.set("b", b.trim());
 
     try {
-      const res: any = await fetcher(`/api/player/path?${params.toString()}`);
+      const res = await $fetch(`/api/player/path?${params.toString()}`);
 
       if (res.nodes.length == 0) {
         return;

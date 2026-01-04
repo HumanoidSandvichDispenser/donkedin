@@ -6,27 +6,33 @@ import RglService from "~~/services/rgl-service";
 import Etf2lService from "~~/services/etf2l-service";
 import PlayerService from "~~/services/player-service";
 
-const rglClient = new RglClient({ BASE: "https://api.rgl.gg" });
+const rglClient = new RglClient();
 const etf2lClient = new Etf2lClient();
 
 export default defineEventHandler(async (event) => {
   const { id } = event.context.params as { id: string };
 
-  if (!id) return createError({ statusCode: 400, statusMessage: "Missing id" });
+  if (!id) {
+    throw createError({ statusCode: 400, statusMessage: "Missing id" });
+  }
 
   const driver = getDriver();
   const session = driver.session();
-  try {
-    const repo = createRepository(session);
-    const rglService = new RglService(rglClient, repo);
-    const etf2lService = new Etf2lService(etf2lClient, repo);
-    const playerService = new PlayerService(rglService, etf2lService, repo);
+  const repo = createRepository(session);
+  const rglService = new RglService(rglClient, repo);
+  const etf2lService = new Etf2lService(etf2lClient, repo);
+  const playerService = new PlayerService(rglService, etf2lService, repo);
 
+  try {
     await playerService.fetchPlayer(id);
-    return await repo.player.getPlayerWithTeamsById(id);
-  } catch (err) {
-    console.error("Error in player handler:", err);
-    throw createError({ statusCode: 500, statusMessage: "Internal error" });
+    const player = await repo.player.getPlayerWithTeamsById(id);
+    if (!player) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Player not found",
+      });
+    }
+    return player;
   } finally {
     await session.close();
   }
