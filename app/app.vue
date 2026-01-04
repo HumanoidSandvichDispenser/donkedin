@@ -46,6 +46,7 @@ watch(
   --mr-green: #87af87;
   --mr-cyan: #87c095;
   --mr-blue: #89beba;
+  --mr-deep-blue: #82a2bd;
   --mr-purple: #d3a0bc;
   --mr-grey: #444444;
   --mr-light-grey: #5e5459;
@@ -67,6 +68,14 @@ watch(
   --subtext: var(--mr-fg-dark);
   --rgl: var(--mr-orange);
   --etf2l: var(--mr-blue);
+
+  --rgl-newcomer: var(--mr-orange);
+  --rgl-amateur: var(--mr-yellow);
+  --rgl-intermediate: var(--mr-green);
+  --rgl-main: var(--mr-blue);
+  --rgl-advanced: var(--mr-deep-blue);
+  --rgl-invite: var(--mr-purple);
+  --invalid-team: var(--muted-text);
 }
 
 body {

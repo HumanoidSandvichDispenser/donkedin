@@ -44,7 +44,9 @@
             >
           </td>
           <td>{{ team.seasonName ?? "-" }}</td>
-          <td>{{ team.divisionName ?? "-" }}</td>
+          <td :style="{ color: divisionColor(team.divisionName) }">
+            {{ team.divisionName ?? "-" }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -66,6 +68,33 @@ const props = defineProps<{ playerId: string }>();
 
 const teams = ref<TeamRow[]>([]);
 const loading = ref(false);
+
+function divisionColor(name?: string | null) {
+  if (!name) {
+    return "var(--text)";
+  }
+
+  const key = String(name).toLowerCase();
+  switch (key) {
+    case "newcomer":
+      return "var(--rgl-newcomer)";
+    case "amateur":
+      return "var(--rgl-amateur)";
+    case "intermediate":
+      return "var(--rgl-intermediate)";
+    case "main":
+      return "var(--rgl-main)";
+    case "advanced":
+      return "var(--rgl-advanced)";
+    case "invite":
+      return "var(--rgl-invite)";
+    case "unassigned":
+    case "dead teams":
+      return "var(--invalid-team)";
+    default:
+      return "var(--text)";
+  }
+}
 
 async function fetchTeams() {
   loading.value = true;
