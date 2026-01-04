@@ -39,7 +39,7 @@ export const useGraphStore = defineStore("graph", () => {
   async function expandNodeById(id: string, type: string) {
     try {
       if (type === "player") {
-        const res = await $fetch(`/api/player/id/${id}`);
+        const res = await $fetch(`/api/players/id/${id}`);
 
         const playerNode = {
           id: res.player.id,
@@ -63,7 +63,7 @@ export const useGraphStore = defineStore("graph", () => {
           addEdgeIfMissing(playerNode, teamNode, 1);
         }
       } else if (type === "rgl") {
-        const res = await $fetch(`/api/team/rgl/id/${id}`);
+        const res = await $fetch(`/api/teams/rgl/id/${id}`);
         const team = res.team;
         const teamNode = { id: team.id, name: team.name, type: "rgl" };
         addNodeIfMissing(teamNode);
@@ -74,7 +74,7 @@ export const useGraphStore = defineStore("graph", () => {
           addEdgeIfMissing(playerNode, teamNode, 1);
         }
       } else if (type === "etf2l") {
-        const res = await $fetch(`/api/team/etf2l/id/${id}`);
+        const res = await $fetch(`/api/teams/etf2l/id/${id}`);
         const team = res.team;
         const teamNode = { id: team.id, name: team.name, type: "etf2l" };
         addNodeIfMissing(teamNode);
@@ -93,7 +93,7 @@ export const useGraphStore = defineStore("graph", () => {
     steamId = steamId.trim();
     if (/^\d+$/.test(steamId)) {
       try {
-        const res = await $fetch(`/api/player/id/${steamId}`);
+        const res = await $fetch(`/api/players/id/${steamId}`);
         const playerNode = {
           id: res.player.id,
           name: res.player.rglName || res.player.etf2lName || res.player.id,
@@ -128,7 +128,7 @@ export const useGraphStore = defineStore("graph", () => {
     params.set("b", b.trim());
 
     try {
-      const res = await $fetch(`/api/player/path?${params.toString()}`);
+      const res = await $fetch(`/api/players/path?${params.toString()}`);
 
       if (res.nodes.length == 0) {
         return;

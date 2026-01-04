@@ -127,7 +127,6 @@ async function doSearch() {
   results.value = [];
 
   const q = query.value.trim();
-  if (!q) return;
 
   if (isSteamId64(q)) {
     await fetchAndEmit(q);
@@ -136,7 +135,12 @@ async function doSearch() {
 
   loading.value = true;
   try {
-    const response = await $fetch(`/api/player/search?q=${encodeURIComponent(q)}&limit=25`);
+    const response = await $fetch(`/api/players/search`, {
+      params: {
+        q: query.value,
+        limit: 25,
+      }
+    });
     results.value = response.players;
   } catch (err: any) {
     console.error(err);
@@ -154,7 +158,7 @@ async function fetchAndEmit(id: string) {
   selectedLoading.value = true;
   error.value = null;
   try {
-    const body = await $fetch(`/api/player/${encodeURIComponent(id)}`);
+    const body = await $fetch(`/api/players/id/${encodeURIComponent(id)}`);
     // close the modal via v-model and emit selection
     emit("update:modelValue", false);
     emit("select", body);
