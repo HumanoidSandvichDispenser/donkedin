@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 defineProps<{
-  person: {
+  person?: {
     id: string;
     name: string;
     rglName?: string;
