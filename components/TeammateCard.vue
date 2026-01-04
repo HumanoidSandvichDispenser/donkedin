@@ -103,6 +103,10 @@ defineProps<{
   align-items: center;
 }
 
+.profile-picture > img {
+  border-radius: 4px;
+}
+
 .card-content {
   display: flex;
   flex-direction: column;
