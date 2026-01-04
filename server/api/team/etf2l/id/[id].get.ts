@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
     if (!team) {
       throw createError({ statusCode: 404, statusMessage: "Team not found" });
     }
+    return team;
   } finally {
     await session.close();
   }

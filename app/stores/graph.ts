@@ -39,9 +39,7 @@ export const useGraphStore = defineStore("graph", () => {
   async function expandNodeById(id: string, type: string) {
     try {
       if (type === "player") {
-        const res = await $fetch(`/api/player/[id]`, {
-          params: { id },
-        });
+        const res = await $fetch(`/api/player/id/${id}`);
 
         const playerNode = {
           id: res.player.id,
@@ -65,10 +63,7 @@ export const useGraphStore = defineStore("graph", () => {
           addEdgeIfMissing(playerNode, teamNode, 1);
         }
       } else if (type === "rgl") {
-        const res = await $fetch(`/api/team/rgl/[id]`, {
-          params: { id },
-        });
-
+        const res = await $fetch(`/api/team/rgl/id/${id}`);
         const team = res.team;
         const teamNode = { id: team.id, name: team.name, type: "rgl" };
         addNodeIfMissing(teamNode);
@@ -79,9 +74,7 @@ export const useGraphStore = defineStore("graph", () => {
           addEdgeIfMissing(playerNode, teamNode, 1);
         }
       } else if (type === "etf2l") {
-        const res = await $fetch(`/api/team/etf2l/[id]`, {
-          params: { id },
-        });
+        const res = await $fetch(`/api/team/etf2l/id/${id}`);
         const team = res.team;
         const teamNode = { id: team.id, name: team.name, type: "etf2l" };
         addNodeIfMissing(teamNode);
@@ -97,12 +90,10 @@ export const useGraphStore = defineStore("graph", () => {
   }
 
   async function loadSourceOnly(steamId: string) {
-    const trimmed = steamId.trim();
-    if (/^\d+$/.test(trimmed)) {
+    steamId = steamId.trim();
+    if (/^\d+$/.test(steamId)) {
       try {
-        const res = await $fetch(`/api/player/[id]`, {
-          params: { id: trimmed },
-        });
+        const res = await $fetch(`/api/player/id/${steamId}`);
         const playerNode = {
           id: res.player.id,
           name: res.player.rglName || res.player.etf2lName || res.player.id,
@@ -125,8 +116,6 @@ export const useGraphStore = defineStore("graph", () => {
         console.error("Load source failed", e);
       }
     }
-
-    addNodeIfMissing({ id: trimmed, name: trimmed, type: "player" });
   }
 
   async function loadPath(a: string, b: string) {
