@@ -9,7 +9,10 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test": "vitest",
-    "lint": "prettier --config .prettierrc --write ."
+    "format": "sh -c 'if [ \"$#\" -gt 0 ]; then prettier --config .prettierrc --write \"$@\"; else prettier --config .prettierrc --write .; fi' --",
+    "lint": "eslint --ext .js,.ts,.vue .",
+    "lintfix": "eslint --ext .js,.ts,.vue . --fix",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@nuxt/ui": "^4.3.0",
@@ -29,12 +32,27 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@eslint/css": "^0.14.1",
+    "@eslint/js": "^9.39.2",
+    "@limegrass/eslint-plugin-import-alias": "^1.6.0",
+    "@nuxt/eslint": "^1.12.1",
     "@openapitools/openapi-generator-cli": "^2.26.0",
+    "@types/cytoscape": "^3.21.9",
     "@types/node": "^25.0.3",
+    "@vue/eslint-config-typescript": "^14.6.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-vue": "^10.6.2",
+    "globals": "^17.0.0",
+    "husky": "^8.0.0",
     "morpheus4j": "^4.5.2",
     "nuxt-scheduler": "^0.1.9",
     "prettier": "^3.7.4",
     "prettier-plugin-brace-style": "^0.8.2",
-    "vitest": "^4.0.16"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.51.0",
+    "vitest": "^4.0.16",
+    "vue-eslint-parser": "^10.2.0"
   }
 }
