@@ -122,13 +122,13 @@ export default class Neo4jPlayerRepository
     const skip = neo4j.int(pageNum * limitNum);
 
     const cypher = `MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t)<-[:MEMBER_OF]-(mate:Player)
-         WHERE mate.id <> $id
+         WHERE mate.id <> $id AND NOT (t:RglTeam AND t.tag = "FA")
          WITH mate, count(DISTINCT t) AS sharedCount
          ORDER BY sharedCount DESC
          RETURN mate`;
 
     const countCypher = `MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t)<-[:MEMBER_OF]-(mate:Player)
-         WHERE mate.id <> $id
+         WHERE mate.id <> $id AND NOT (t:RglTeam AND t.tag = "FA")
          RETURN count(DISTINCT mate) as total`;
 
     const params: any = { id, skip, limit: neo4j.int(limitNum) };
