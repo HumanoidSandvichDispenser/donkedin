@@ -11,8 +11,12 @@
         <button class="btn" :disabled="page <= 0" @click="prevPage">
           Prev
         </button>
-        <span class="page-indicator">Page {{ page + 1 }}</span>
-        <button class="btn" :disabled="!hasMore" @click="nextPage">Next</button>
+        <span class="page-indicator"
+          >Page {{ page + 1 }} / {{ pageCount }}</span
+        >
+        <button class="btn" :disabled="page >= pageCount - 1" @click="nextPage">
+          Next
+        </button>
       </div>
     </div>
   </div>
@@ -30,10 +34,14 @@ interface PlayerNode {
   avatarUrl?: string | null;
 }
 
-const props = defineProps<{ playerId: string; limit?: number }>();
+const props = defineProps<{
+  playerId: string;
+  limit?: number;
+  initialPage?: number;
+}>();
 
 const teammates = ref<PlayerNode[]>([]);
-const page = ref(0);
+const page = ref(props.initialPage ?? 0);
 const loading = ref(false);
 const pageCount = ref(1);
 
@@ -41,10 +49,10 @@ async function fetchPage(p: number) {
   loading.value = true;
   try {
     const limit = typeof props.limit === "number" ? props.limit : 25;
-    const res = await $fetch(`/api/players/id/${props.playerId}/details`, {
+    const res = await $fetch(`/api/players/id/${props.playerId}/teammates`, {
       params: { page: p, limit },
     });
-    teammates.value = res.teammates;
+    teammates.value = res.teammates ?? [];
     page.value = p;
     pageCount.value = typeof res.pageCount === "number" ? res.pageCount : 1;
   } catch (err) {
@@ -69,11 +77,9 @@ function nextPage() {
 }
 
 onMounted(() => {
-  // load first page
-  fetchPage(0);
+  fetchPage(page.value || 0);
 });
 
-// allow parent to trigger refresh by watching playerId
 watch(
   () => props.playerId,
   () => {

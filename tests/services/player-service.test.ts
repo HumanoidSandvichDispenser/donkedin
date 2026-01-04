@@ -140,3 +140,63 @@ it("returns player details via repository", async () => {
   expect(repo.player.getPlayerDetailsById).toHaveBeenCalledWith("7656", 2, 50);
   expect(res2).toBe(expected);
 });
+
+it("returns teams via repository", async () => {
+  const repo = createStrictRepositoryMock();
+  const expected = {
+    rgl: [{ id: 1, name: "T1" }],
+    etf2l: [{ id: 2, name: "T2" }],
+  };
+  repo.player.getPlayerTeamsById = vi.fn().mockResolvedValue(expected);
+  repo.player.needsFetch = vi.fn().mockResolvedValue(false);
+
+  const rglService: any = { fetchRglPlayerFromApi: vi.fn() };
+  const etf2lService: any = { fetchEtf2lPlayerFromApi: vi.fn() };
+
+  const svc = new PlayerService(rglService, etf2lService, repo as any);
+  const res = await svc.getPlayerTeams("7656");
+
+  expect(repo.player.getPlayerTeamsById).toHaveBeenCalledWith("7656");
+  expect(res).toBe(expected);
+});
+
+it("returns teammates via repository with pagination defaults and args", async () => {
+  const repo = createStrictRepositoryMock();
+  const expected = {
+    teammates: [
+      {
+        id: "7657",
+        rglName: "Mate",
+        etf2lName: null,
+        lastUpdated: null,
+        avatarUrl: null,
+      },
+    ],
+    pageCount: 3,
+  };
+
+  repo.player.getPlayerTeammatesById = vi.fn().mockResolvedValue(expected);
+  repo.player.needsFetch = vi.fn().mockResolvedValue(false);
+
+  const rglService: any = { fetchRglPlayerFromApi: vi.fn() };
+  const etf2lService: any = { fetchEtf2lPlayerFromApi: vi.fn() };
+
+  const svc = new PlayerService(rglService, etf2lService, repo as any);
+  const res1 = await svc.getPlayerTeammates("7656");
+
+  expect(repo.player.getPlayerTeammatesById).toHaveBeenCalledWith(
+    "7656",
+    0,
+    25,
+  );
+  expect(res1).toBe(expected);
+
+  repo.player.getPlayerTeammatesById = vi.fn().mockResolvedValue(expected);
+  const res2 = await svc.getPlayerTeammates("7656", 2, 50);
+  expect(repo.player.getPlayerTeammatesById).toHaveBeenCalledWith(
+    "7656",
+    2,
+    50,
+  );
+  expect(res2).toBe(expected);
+});

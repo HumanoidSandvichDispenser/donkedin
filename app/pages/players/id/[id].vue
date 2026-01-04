@@ -29,6 +29,11 @@
         <strong>Top teammates</strong>
         <TeammateList :player-id="id" />
       </div>
+
+      <div class="teams-section">
+        <strong>Teams</strong>
+        <TeamTable :player-id="id" />
+      </div>
     </div>
   </div>
 </template>
@@ -38,15 +43,34 @@ import { useRoute } from "vue-router";
 import { ref, onMounted, computed } from "vue";
 import type { PlayerNode } from "~~/repositories/types";
 import TeammateList from "~~/components/TeammateList.vue";
+import TeamTable from "~~/components/TeamTable.vue";
 
 const route = useRoute();
 const id = String(route.params.id || "");
 
 const player = ref<PlayerNode | null>(null);
 const teams = ref({
-  rgl: [] as { id: number; name: string }[],
-  etf2l: [] as { id: number; name: string }[],
+  rgl: [] as {
+    id: number;
+    name: string;
+    seasonName?: string;
+    divisionName?: string;
+    lastUpdated?: string | null;
+    tag?: string | null;
+  }[],
+  etf2l: [] as {
+    id: number;
+    name: string;
+    seasonName?: string;
+    divisionName?: string;
+    lastUpdated?: string | null;
+    tag?: string | null;
+  }[],
 });
+
+const teammates = ref<any[]>([]);
+const teammatesPageCount = ref(1);
+
 const found = ref(false);
 const loaded = ref(false);
 
@@ -58,13 +82,22 @@ const displayName = computed(() => {
 onMounted(async () => {
   loaded.value = false;
   try {
-    const res = await $fetch(`/api/players/id/${id}/details`);
-    if (res) {
-      found.value = true;
-      player.value = res.player ?? null;
-      teams.value = res.teams ?? { rgl: [], etf2l: [] };
-    } else {
+    const [playerRes, teamsRes, matesRes] = await Promise.all([
+      $fetch(`/api/players/id/${id}`),
+      $fetch(`/api/players/id/${id}/teams`),
+      $fetch(`/api/players/id/${id}/teammates`, {
+        params: { page: 0, limit: 25 },
+      }),
+    ]);
+
+    if (!playerRes) {
       found.value = false;
+    } else {
+      found.value = true;
+      player.value = playerRes.player ?? null;
+      teams.value = (teamsRes && teamsRes.teams) ?? { rgl: [], etf2l: [] };
+      teammates.value = (matesRes && matesRes.teammates) ?? [];
+      teammatesPageCount.value = (matesRes && matesRes.pageCount) ?? 1;
     }
   } catch (err) {
     console.error(err);

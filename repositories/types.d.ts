@@ -31,17 +31,26 @@ export interface PlayerRepository {
    * Returns a detailed player summary including the player node, teams and
    * first-degree teammates (players who shared a team with this player).
    */
+  getPlayerTeamsById(
+    id: string,
+  ): Promise<{ rgl: TeamNode[]; etf2l: TeamNode[] } | null>;
+
+  getPlayerTeammatesById(
+    id: string,
+    page?: number | undefined,
+    limit?: number | undefined,
+  ): Promise<{ teammates: PlayerNode[]; pageCount: number } | null>;
+
   getPlayerDetailsById(
     id: string,
     page?: number | undefined,
     limit?: number | undefined,
   ): Promise<{
     player: PlayerNode;
-    teams: { rgl: TeamSummary[]; etf2l: TeamSummary[] };
+    teams: { rgl: TeamNode[]; etf2l: TeamNode[] };
     teammates: PlayerNode[];
     pageCount: number;
   } | null>;
-
   searchPlayersByAlias(alias: string, limit?: number): Promise<PlayerNode[]>;
 
   findPathBetweenPlayers(

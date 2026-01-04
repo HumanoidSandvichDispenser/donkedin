@@ -70,25 +70,7 @@ export default class Neo4jPlayerRepository
     };
   }
 
-  async getPlayerDetailsById(id: string, page?: number, limit?: number) {
-    // Fetch player node
-    const playerRes = await this.session.executeRead((tx) =>
-      tx.run("MATCH (p:Player {id:$id}) RETURN p", { id }),
-    );
-    if (playerRes.records.length === 0) {
-      return null;
-    }
-
-    const pNode = playerRes.records[0].get("p");
-    const playerOut = {
-      id,
-      rglName: pNode.properties?.rglName ?? null,
-      etf2lName: pNode.properties?.etf2lName ?? null,
-      lastUpdated: pNode.properties?.lastUpdated ?? null,
-      avatarUrl: pNode.properties?.avatarUrl ?? null,
-    };
-
-    // Fetch teams
+  async getPlayerTeamsById(id: string) {
     const rglTeamsResRead = await this.session.executeRead((tx) =>
       tx.run("MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t:RglTeam) RETURN t", {
         id,
@@ -108,6 +90,10 @@ export default class Neo4jPlayerRepository
           ? (t.properties.id as any).toNumber()
           : t.properties.id,
         name: t.properties.name ?? null,
+        lastUpdated: t.properties.lastUpdated ?? null,
+        tag: t.properties.tag ?? null,
+        divisionName: t.properties.divisionName ?? null,
+        seasonName: t.properties.seasonName ?? null,
       };
     });
 
@@ -118,10 +104,17 @@ export default class Neo4jPlayerRepository
           ? (t.properties.id as any).toNumber()
           : t.properties.id,
         name: t.properties.name ?? null,
+        lastUpdated: t.properties.lastUpdated ?? null,
+        tag: t.properties.tag ?? null,
+        divisionName: t.properties.divisionName ?? null,
+        seasonName: t.properties.seasonName ?? null,
       };
     });
 
-    // Fetch first-degree teammates with shared team counts and sort by that count
+    return { rgl: rglTeamsOut, etf2l: etf2lTeamsOut };
+  }
+
+  async getPlayerTeammatesById(id: string, page?: number, limit?: number) {
     // Apply SKIP/LIMIT (limit per page). Default: page 0, limit 25.
     const limitNum =
       typeof limit === "number" && limit > 0 ? Math.min(limit, 100) : 25;
@@ -164,11 +157,36 @@ export default class Neo4jPlayerRepository
       };
     });
 
+    return { teammates: teammatesOut, pageCount };
+  }
+
+  async getPlayerDetailsById(id: string, page?: number, limit?: number) {
+    // Fetch player node
+    const playerRes = await this.session.executeRead((tx) =>
+      tx.run("MATCH (p:Player {id:$id}) RETURN p", { id }),
+    );
+    if (playerRes.records.length === 0) {
+      return null;
+    }
+
+    const pNode = playerRes.records[0].get("p");
+    const playerOut = {
+      id,
+      rglName: pNode.properties?.rglName ?? null,
+      etf2lName: pNode.properties?.etf2lName ?? null,
+      lastUpdated: pNode.properties?.lastUpdated ?? null,
+      avatarUrl: pNode.properties?.avatarUrl ?? null,
+    };
+
+    // Delegate to the specialized methods
+    const teams = await this.getPlayerTeamsById(id);
+    const teammatesRes = await this.getPlayerTeammatesById(id, page, limit);
+
     return {
       player: playerOut,
-      teams: { rgl: rglTeamsOut, etf2l: etf2lTeamsOut },
-      teammates: teammatesOut,
-      pageCount,
+      teams: teams ?? { rgl: [], etf2l: [] },
+      teammates: teammatesRes ? teammatesRes.teammates : [],
+      pageCount: teammatesRes ? teammatesRes.pageCount : 1,
     };
   }
 

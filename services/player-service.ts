@@ -66,10 +66,28 @@ export default class PlayerService {
   /**
    * Returns a detailed player summary including player, teams and teammates.
    */
+  async getPlayerTeams(id: string) {
+    // ensure latest data
+    await this.fetchPlayer(id);
+    return this.repository.player.getPlayerTeamsById(id);
+  }
+
+  async getPlayerTeammates(id: string, page?: number, limit?: number) {
+    await this.fetchPlayer(id);
+    const pageNum = typeof page === "number" && page >= 0 ? page : 0;
+    const limitNum = typeof limit === "number" && limit > 0 ? limit : 25;
+    return this.repository.player.getPlayerTeammatesById(id, pageNum, limitNum);
+  }
+
   async getPlayerDetails(id: string, page?: number, limit?: number) {
     await this.fetchPlayer(id);
     const pageNum = typeof page === "number" && page >= 0 ? page : 0;
     const limitNum = typeof limit === "number" && limit > 0 ? limit : 25;
-    return this.repository.player.getPlayerDetailsById(id, pageNum, limitNum);
+    const details = await this.repository.player.getPlayerDetailsById(
+      id,
+      pageNum,
+      limitNum,
+    );
+    return details;
   }
 }
