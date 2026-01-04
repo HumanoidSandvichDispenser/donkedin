@@ -11,7 +11,7 @@
         <button class="btn" @click="expandNode">Expand</button>
         <NuxtLink
           v-if="node.type === 'player'"
-          :to="`/player/${node.id}`"
+          :to="`/players/id/${node.id}`"
           class="btn-ghost"
         >
           Open player page
