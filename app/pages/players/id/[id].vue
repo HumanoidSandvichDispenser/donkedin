@@ -1,39 +1,41 @@
 <template>
   <div class="player-page">
-    <h1 class="title">{{ displayName }}</h1>
-
     <div v-if="!loaded" class="loading">Loading...</div>
     <div v-else-if="!found" class="not-found">Player not found</div>
     <div v-else class="content">
-      <div class="profile">
-        <img
-          v-if="player?.avatarUrl"
-          :src="player?.avatarUrl"
-          alt="avatar"
-          class="avatar"
-        >
-        <div class="meta">
-          <div><strong>ID:</strong> {{ player?.id }}</div>
-          <div v-if="teams.rgl.length">
-            <strong>RGL teams:</strong>
-            {{ teams.rgl.map((t) => t.name).join(", ") }}
+      <div class="left">
+        <div class="profile-wrap">
+          <div class="profile">
+            <img
+              v-if="player?.avatarUrl"
+              :src="player?.avatarUrl"
+              alt="avatar"
+              class="avatar"
+            >
+            <div class="meta">
+              <div class="name-row">
+                <h1 class="title">{{ displayName }}</h1>
+                <div class="subtext">
+                  RGL: {{ player?.rglName ?? "not found" }} &middot; ETF2L:
+                  {{ player?.etf2lName ?? "not found" }} &middot; SteamID64:
+                  {{ player?.id ?? "not found" }}
+                </div>
+              </div>
+            </div>
           </div>
-          <div v-if="teams.etf2l.length">
-            <strong>ETF2L teams:</strong>
-            {{ teams.etf2l.map((t) => t.name).join(", ") }}
-          </div>
+        </div>
+
+        <div class="teams-section">
+          <TeamTable :player-id="id" />
         </div>
       </div>
 
-      <div class="teammates-section">
-        <strong>Top teammates</strong>
-        <TeammateList :player-id="id" />
-      </div>
-
-      <div class="teams-section">
-        <strong>Teams</strong>
-        <TeamTable :player-id="id" />
-      </div>
+      <aside class="right">
+        <div class="teammates-section">
+          <strong>Top teammates</strong>
+          <TeammateList :player-id="id" />
+        </div>
+      </aside>
     </div>
   </div>
 </template>
@@ -49,27 +51,6 @@ const route = useRoute();
 const id = String(route.params.id || "");
 
 const player = ref<PlayerNode | null>(null);
-const teams = ref({
-  rgl: [] as {
-    id: number;
-    name: string;
-    seasonName?: string;
-    divisionName?: string;
-    lastUpdated?: string | null;
-    tag?: string | null;
-  }[],
-  etf2l: [] as {
-    id: number;
-    name: string;
-    seasonName?: string;
-    divisionName?: string;
-    lastUpdated?: string | null;
-    tag?: string | null;
-  }[],
-});
-
-const teammates = ref<any[]>([]);
-const teammatesPageCount = ref(1);
 
 const found = ref(false);
 const loaded = ref(false);
@@ -82,22 +63,12 @@ const displayName = computed(() => {
 onMounted(async () => {
   loaded.value = false;
   try {
-    const [playerRes, teamsRes, matesRes] = await Promise.all([
-      $fetch(`/api/players/id/${id}`),
-      $fetch(`/api/players/id/${id}/teams`),
-      $fetch(`/api/players/id/${id}/teammates`, {
-        params: { page: 0, limit: 25 },
-      }),
-    ]);
-
+    const playerRes = await $fetch(`/api/players/id/${id}`);
     if (!playerRes) {
       found.value = false;
     } else {
       found.value = true;
       player.value = playerRes.player ?? null;
-      teams.value = (teamsRes && teamsRes.teams) ?? { rgl: [], etf2l: [] };
-      teammates.value = (matesRes && matesRes.teammates) ?? [];
-      teammatesPageCount.value = (matesRes && matesRes.pageCount) ?? 1;
     }
   } catch (err) {
     console.error(err);
@@ -113,9 +84,21 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 16px;
 }
 .title {
-  font-size: 20px;
+  font-size: 28px;
+  margin: 0;
+  line-height: 1.1;
+}
+.name-row {
+  display: flex;
+  flex-direction: column;
+}
+.subtext {
+  font-size: 13px;
+  color: var(--subtext);
+  margin-top: 4px;
 }
 .loading,
 .not-found {
@@ -123,8 +106,21 @@ onMounted(async () => {
 }
 .content {
   display: flex;
+  gap: 16px;
+}
+.left {
+  flex: 1 1 60%;
+  display: flex;
   flex-direction: column;
   gap: 16px;
+}
+.right {
+  flex: 0 0 320px;
+}
+.profile-wrap {
+  background: var(--surface-0);
+  padding: 16px;
+  border-radius: 6px;
 }
 .profile {
   display: flex;
@@ -146,5 +142,8 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.teams-section {
+  margin-top: 8px;
 }
 </style>

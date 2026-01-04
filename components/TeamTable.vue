@@ -1,52 +1,54 @@
 <template>
-  <table class="team-table">
-    <thead>
-      <tr>
-        <th>League</th>
-        <th>Team</th>
-        <th>Season</th>
-        <th>Division</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="team in teams" :key="team.league + '-' + team.id">
-        <td>
-          <a
-            v-if="team.league === 'rgl'"
-            :href="`https://rgl.gg/Public/Team?t=${team.id}`"
-            target="_blank"
-            rel="noopener"
-            >RGL</a
-          >
-          <a
-            v-else
-            :href="`https://etf2l.org/teams/${team.id}`"
-            target="_blank"
-            rel="noopener"
-            >ETF2L</a
-          >
-        </td>
-        <td>
-          <a
-            v-if="team.league === 'rgl'"
-            :href="`https://rgl.gg/Public/Team?t=${team.id}`"
-            target="_blank"
-            rel="noopener"
-            >{{ team.name }}</a
-          >
-          <a
-            v-else
-            :href="`https://etf2l.org/teams/${team.id}`"
-            target="_blank"
-            rel="noopener"
-            >{{ team.name }}</a
-          >
-        </td>
-        <td>{{ team.seasonName ?? "-" }}</td>
-        <td>{{ team.divisionName ?? "-" }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="team-table-wrap">
+    <table class="team-table">
+      <thead>
+        <tr>
+          <th>League</th>
+          <th>Team</th>
+          <th>Season</th>
+          <th>Division</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="team in teams" :key="team.league + '-' + team.id">
+          <td>
+            <a
+              v-if="team.league === 'rgl'"
+              :href="`https://rgl.gg/Public/Team?t=${team.id}`"
+              target="_blank"
+              rel="noopener"
+              >RGL</a
+            >
+            <a
+              v-else
+              :href="`https://etf2l.org/teams/${team.id}`"
+              target="_blank"
+              rel="noopener"
+              >ETF2L</a
+            >
+          </td>
+          <td>
+            <a
+              v-if="team.league === 'rgl'"
+              :href="`https://rgl.gg/Public/Team?t=${team.id}`"
+              target="_blank"
+              rel="noopener"
+              >{{ team.name }}</a
+            >
+            <a
+              v-else
+              :href="`https://etf2l.org/teams/${team.id}`"
+              target="_blank"
+              rel="noopener"
+              >{{ team.name }}</a
+            >
+          </td>
+          <td>{{ team.seasonName ?? "-" }}</td>
+          <td>{{ team.divisionName ?? "-" }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -110,6 +112,11 @@ watch(
 </script>
 
 <style scoped>
+.team-table-wrap {
+  background: var(--surface-0);
+  padding: 16px;
+  border-radius: 6px;
+}
 .team-table {
   width: 100%;
   border-collapse: collapse;
@@ -117,7 +124,7 @@ watch(
 .team-table th,
 .team-table td {
   border: 1px solid var(--muted-border);
-  padding: 6px 8px;
+  padding: 8px;
   text-align: left;
 }
 .team-table th {

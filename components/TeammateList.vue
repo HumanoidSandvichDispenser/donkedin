@@ -1,22 +1,30 @@
 <template>
   <div class="teammate-list">
-    <div v-if="loading" class="loading">Loading teammates...</div>
-    <div v-else>
-      <div v-if="teammates.length === 0" class="empty">No teammates found</div>
-      <div class="list">
-        <TeammateCard v-for="t in teammates" :key="t.id" :person="t" />
-      </div>
+    <div class="teammate-wrap">
+      <div v-if="loading" class="loading">Loading teammates...</div>
+      <div v-else>
+        <div v-if="teammates.length === 0" class="empty">
+          No teammates found
+        </div>
+        <div class="list">
+          <TeammateCard v-for="t in teammates" :key="t.id" :person="t" />
+        </div>
 
-      <div class="pagination">
-        <button class="btn" :disabled="page <= 0" @click="prevPage">
-          Prev
-        </button>
-        <span class="page-indicator"
-          >Page {{ page + 1 }} / {{ pageCount }}</span
-        >
-        <button class="btn" :disabled="page >= pageCount - 1" @click="nextPage">
-          Next
-        </button>
+        <div class="pagination">
+          <button class="btn" :disabled="page <= 0" @click="prevPage">
+            Prev
+          </button>
+          <span class="page-indicator"
+            >Page {{ page + 1 }} / {{ pageCount }}</span
+          >
+          <button
+            class="btn"
+            :disabled="page >= pageCount - 1"
+            @click="nextPage"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -94,6 +102,11 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+.teammate-wrap {
+  background: var(--surface-0);
+  padding: 16px;
+  border-radius: 6px;
 }
 .list {
   display: grid;
