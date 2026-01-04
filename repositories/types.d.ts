@@ -34,6 +34,7 @@ export interface PlayerRepository {
   getPlayerDetailsById(
     id: string,
     page?: number | undefined,
+    limit?: number | undefined,
   ): Promise<{
     player: PlayerNode;
     teams: { rgl: TeamSummary[]; etf2l: TeamSummary[] };

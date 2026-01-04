@@ -30,7 +30,7 @@ interface PlayerNode {
   avatarUrl?: string | null;
 }
 
-const props = defineProps<{ playerId: string }>();
+const props = defineProps<{ playerId: string; limit?: number }>();
 
 const teammates = ref<PlayerNode[]>([]);
 const page = ref(0);
@@ -40,8 +40,9 @@ const pageCount = ref(1);
 async function fetchPage(p: number) {
   loading.value = true;
   try {
+    const limit = typeof props.limit === "number" ? props.limit : 25;
     const res = await $fetch(`/api/players/id/${props.playerId}/details`, {
-      params: { page: p },
+      params: { page: p, limit },
     });
     teammates.value = res.teammates;
     page.value = p;

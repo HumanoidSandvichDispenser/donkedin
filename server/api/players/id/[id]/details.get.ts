@@ -35,7 +35,18 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    const details = await playerService.getPlayerDetails(id, page);
+    // limit: optional query param, default 25, max 100
+    let limit = 25;
+    if (q?.limit !== undefined) {
+      const parsed = parseInt(String(q.limit), 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 100) {
+        limit = parsed;
+      } else {
+        throw createError({ statusCode: 400, statusMessage: "Invalid limit" });
+      }
+    }
+
+    const details = await playerService.getPlayerDetails(id, page, limit);
     if (!details) {
       throw createError({ statusCode: 404, statusMessage: "Player not found" });
     }

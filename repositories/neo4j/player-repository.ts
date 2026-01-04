@@ -70,7 +70,7 @@ export default class Neo4jPlayerRepository
     };
   }
 
-  async getPlayerDetailsById(id: string, page?: number) {
+  async getPlayerDetailsById(id: string, page?: number, limit?: number) {
     // Fetch player node
     const playerRes = await this.session.executeRead((tx) =>
       tx.run("MATCH (p:Player {id:$id}) RETURN p", { id }),
@@ -122,10 +122,11 @@ export default class Neo4jPlayerRepository
     });
 
     // Fetch first-degree teammates with shared team counts and sort by that count
-    // Apply SKIP/LIMIT (25 per page). Default: page 0.
-    const limit = 25;
+    // Apply SKIP/LIMIT (limit per page). Default: page 0, limit 25.
+    const limitNum =
+      typeof limit === "number" && limit > 0 ? Math.min(limit, 100) : 25;
     const pageNum = typeof page === "number" && page >= 0 ? page : 0;
-    const skip = neo4j.int(pageNum * limit);
+    const skip = neo4j.int(pageNum * limitNum);
 
     const cypher = `MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t)<-[:MEMBER_OF]-(mate:Player)
          WHERE mate.id <> $id
@@ -137,7 +138,7 @@ export default class Neo4jPlayerRepository
          WHERE mate.id <> $id
          RETURN count(DISTINCT mate) as total`;
 
-    const params: any = { id, skip, limit: neo4j.int(limit) };
+    const params: any = { id, skip, limit: neo4j.int(limitNum) };
 
     // Get total count to compute pageCount
     const totalRes = await this.session.executeRead((tx) =>
@@ -145,7 +146,7 @@ export default class Neo4jPlayerRepository
     );
     const total = totalRes.records[0].get("total");
     const totalNumber = neo4j.isInt(total) ? (total as any).toNumber() : total;
-    const pageCount = Math.ceil(totalNumber / limit);
+    const pageCount = Math.ceil(totalNumber / limitNum);
 
     const teammatesRes = await this.session.executeRead((tx) =>
       tx.run(cypher + " SKIP $skip LIMIT $limit", params),

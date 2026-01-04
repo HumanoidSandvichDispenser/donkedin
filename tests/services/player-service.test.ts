@@ -129,14 +129,14 @@ it("returns player details via repository", async () => {
   const etf2lService: any = { fetchEtf2lPlayerFromApi: vi.fn() };
 
   const svc = new PlayerService(rglService, etf2lService, repo as any);
-  const res = await svc.getPlayerDetails("7656");
+  const res1 = await svc.getPlayerDetails("7656");
 
-  expect(repo.player.getPlayerDetailsById).toHaveBeenCalledWith("7656", 0);
-  expect(res).toBe(expected);
+  expect(repo.player.getPlayerDetailsById).toHaveBeenCalledWith("7656", 0, 25);
+  expect(res1).toBe(expected);
 
-  // also test pagination value is passed through
+  // also test pagination and limit value is passed through
   repo.player.getPlayerDetailsById = vi.fn().mockResolvedValue(expected);
-  const res2 = await svc.getPlayerDetails("7656", 2);
-  expect(repo.player.getPlayerDetailsById).toHaveBeenCalledWith("7656", 2);
+  const res2 = await svc.getPlayerDetails("7656", 2, 50);
+  expect(repo.player.getPlayerDetailsById).toHaveBeenCalledWith("7656", 2, 50);
   expect(res2).toBe(expected);
 });
