@@ -4,6 +4,7 @@ import {
   Neo4jEtf2lTeamRepository,
   Neo4jRglTeamRepository,
 } from "./team-repository";
+import Neo4jRglSeasonRepository from "./rgl-season-repository";
 import type { Repository } from "../types";
 
 export default function createRepository(session: Session): Repository {
@@ -13,5 +14,6 @@ export default function createRepository(session: Session): Repository {
       rgl: new Neo4jRglTeamRepository(session),
       etf2l: new Neo4jEtf2lTeamRepository(session),
     },
+    rglSeason: new Neo4jRglSeasonRepository(session),
   };
 }
