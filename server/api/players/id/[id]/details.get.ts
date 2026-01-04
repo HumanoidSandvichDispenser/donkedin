@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const q = getQuery(event) as Record<string, any>;
-    let page: number | undefined = undefined;
+    let page = 0;
     if (q?.page !== undefined) {
       const parsed = parseInt(String(q.page), 10);
       if (!isNaN(parsed) && parsed >= 0) {

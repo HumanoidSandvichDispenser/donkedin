@@ -35,7 +35,7 @@ const props = defineProps<{ playerId: string }>();
 const teammates = ref<PlayerNode[]>([]);
 const page = ref(0);
 const loading = ref(false);
-const hasMore = ref(false);
+const pageCount = ref(1);
 
 async function fetchPage(p: number) {
   loading.value = true;
@@ -43,18 +43,13 @@ async function fetchPage(p: number) {
     const res = await $fetch(`/api/players/id/${props.playerId}/details`, {
       params: { page: p },
     });
-    if (res && Array.isArray(res.teammates)) {
-      teammates.value = res.teammates;
-      hasMore.value = res.teammates.length === 25; // if full page, assume there may be more
-      page.value = p;
-    } else {
-      teammates.value = [];
-      hasMore.value = false;
-    }
+    teammates.value = res.teammates;
+    page.value = p;
+    pageCount.value = typeof res.pageCount === "number" ? res.pageCount : 1;
   } catch (err) {
     console.error("Failed to load teammates", err);
     teammates.value = [];
-    hasMore.value = false;
+    pageCount.value = 1;
   } finally {
     loading.value = false;
   }
@@ -67,7 +62,7 @@ function prevPage() {
 }
 
 function nextPage() {
-  if (hasMore.value) {
+  if (page.value < pageCount.value - 1) {
     fetchPage(page.value + 1);
   }
 }

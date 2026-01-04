@@ -38,6 +38,7 @@ export interface PlayerRepository {
     player: PlayerNode;
     teams: { rgl: TeamSummary[]; etf2l: TeamSummary[] };
     teammates: PlayerNode[];
+    pageCount: number;
   } | null>;
 
   searchPlayersByAlias(alias: string, limit?: number): Promise<PlayerNode[]>;

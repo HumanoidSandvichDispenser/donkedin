@@ -68,6 +68,7 @@ export default class PlayerService {
    */
   async getPlayerDetails(id: string, page?: number) {
     await this.fetchPlayer(id);
-    return this.repository.player.getPlayerDetailsById(id, page);
+    const pageNum = typeof page === "number" && page >= 0 ? page : 0;
+    return this.repository.player.getPlayerDetailsById(id, pageNum);
   }
 }

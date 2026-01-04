@@ -45,7 +45,7 @@ export default class Neo4jPlayerRepository
       const t = r.get("t");
       return {
         id: neo4j.isInt(t.properties.id)
-          ? (t.properties.id as neo4j.Integer).toNumber()
+          ? (t.properties.id as any).toNumber()
           : t.properties.id,
         name: t.properties.name ?? null,
       };
@@ -55,7 +55,7 @@ export default class Neo4jPlayerRepository
       const t = r.get("t");
       return {
         id: neo4j.isInt(t.properties.id)
-          ? (t.properties.id as neo4j.Integer).toNumber()
+          ? (t.properties.id as any).toNumber()
           : t.properties.id,
         name: t.properties.name ?? null,
       };
@@ -105,7 +105,7 @@ export default class Neo4jPlayerRepository
       const t = r.get("t");
       return {
         id: neo4j.isInt(t.properties.id)
-          ? (t.properties.id as neo4j.Integer).toNumber()
+          ? (t.properties.id as any).toNumber()
           : t.properties.id,
         name: t.properties.name ?? null,
       };
@@ -115,44 +115,47 @@ export default class Neo4jPlayerRepository
       const t = r.get("t");
       return {
         id: neo4j.isInt(t.properties.id)
-          ? (t.properties.id as neo4j.Integer).toNumber()
+          ? (t.properties.id as any).toNumber()
           : t.properties.id,
         name: t.properties.name ?? null,
       };
     });
 
     // Fetch first-degree teammates with shared team counts and sort by that count
-    // If page is provided, apply SKIP/LIMIT (25 per page). Default: return all.
+    // Apply SKIP/LIMIT (25 per page). Default: page 0.
     const limit = 25;
-    const usePagination = typeof page === "number" && page >= 0;
-    const skip = usePagination ? neo4j.int(page * limit) : undefined;
+    const pageNum = typeof page === "number" && page >= 0 ? page : 0;
+    const skip = neo4j.int(pageNum * limit);
 
-    const cypher = usePagination
-      ? `MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t)<-[:MEMBER_OF]-(mate:Player)
-         WHERE mate.id <> $id
-         WITH mate, count(DISTINCT t) AS sharedCount
-         ORDER BY sharedCount DESC
-         SKIP $skip
-         LIMIT $limit
-         RETURN mate`
-      : `MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t)<-[:MEMBER_OF]-(mate:Player)
+    const cypher = `MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t)<-[:MEMBER_OF]-(mate:Player)
          WHERE mate.id <> $id
          WITH mate, count(DISTINCT t) AS sharedCount
          ORDER BY sharedCount DESC
          RETURN mate`;
 
-    const params: any = { id };
-    if (usePagination) params.skip = skip;
-    if (usePagination) params.limit = neo4j.int(limit);
+    const countCypher = `MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t)<-[:MEMBER_OF]-(mate:Player)
+         WHERE mate.id <> $id
+         RETURN count(DISTINCT mate) as total`;
+
+    const params: any = { id, skip, limit: neo4j.int(limit) };
+
+    // Get total count to compute pageCount
+    const totalRes = await this.session.executeRead((tx) =>
+      tx.run(countCypher, { id }),
+    );
+    const total = totalRes.records[0].get("total");
+    const totalNumber = neo4j.isInt(total) ? (total as any).toNumber() : total;
+    const pageCount = Math.ceil(totalNumber / limit);
 
     const teammatesRes = await this.session.executeRead((tx) =>
-      tx.run(cypher, params),
+      tx.run(cypher + " SKIP $skip LIMIT $limit", params),
     );
 
     const teammatesOut = teammatesRes.records.map((r) => {
       const mate = r.get("mate");
+      const mateId = mate.properties.id;
       return {
-        id: mate.properties.id,
+        id: neo4j.isInt(mateId) ? (mateId as any).toNumber() : mateId,
         rglName: mate.properties.rglName ?? null,
         etf2lName: mate.properties.etf2lName ?? null,
         lastUpdated: mate.properties.lastUpdated ?? null,
@@ -164,6 +167,7 @@ export default class Neo4jPlayerRepository
       player: playerOut,
       teams: { rgl: rglTeamsOut, etf2l: etf2lTeamsOut },
       teammates: teammatesOut,
+      pageCount,
     };
   }
 
@@ -188,7 +192,7 @@ export default class Neo4jPlayerRepository
       const node = r.get("node");
       const props = node?.properties ?? {};
       const id = neo4j.isInt(props.id)
-        ? (props.id as neo4j.Integer).toNumber()
+        ? (props.id as any).toNumber()
         : props.id;
       return {
         id: id,

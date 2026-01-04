@@ -120,6 +120,7 @@ it("returns player details via repository", async () => {
         avatarUrl: null,
       },
     ],
+    pageCount: 1,
   };
   repo.player.getPlayerDetailsById = vi.fn().mockResolvedValue(expected);
   repo.player.needsFetch = vi.fn().mockResolvedValue(false);
@@ -130,10 +131,7 @@ it("returns player details via repository", async () => {
   const svc = new PlayerService(rglService, etf2lService, repo as any);
   const res = await svc.getPlayerDetails("7656");
 
-  expect(repo.player.getPlayerDetailsById).toHaveBeenCalledWith(
-    "7656",
-    undefined,
-  );
+  expect(repo.player.getPlayerDetailsById).toHaveBeenCalledWith("7656", 0);
   expect(res).toBe(expected);
 
   // also test pagination value is passed through
