@@ -70,6 +70,103 @@ export default class Neo4jPlayerRepository
     };
   }
 
+  async getPlayerDetailsById(id: string, page?: number) {
+    // Fetch player node
+    const playerRes = await this.session.executeRead((tx) =>
+      tx.run("MATCH (p:Player {id:$id}) RETURN p", { id }),
+    );
+    if (playerRes.records.length === 0) {
+      return null;
+    }
+
+    const pNode = playerRes.records[0].get("p");
+    const playerOut = {
+      id,
+      rglName: pNode.properties?.rglName ?? null,
+      etf2lName: pNode.properties?.etf2lName ?? null,
+      lastUpdated: pNode.properties?.lastUpdated ?? null,
+      avatarUrl: pNode.properties?.avatarUrl ?? null,
+    };
+
+    // Fetch teams
+    const rglTeamsResRead = await this.session.executeRead((tx) =>
+      tx.run("MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t:RglTeam) RETURN t", {
+        id,
+      }),
+    );
+
+    const etf2lTeamsResRead = await this.session.executeRead((tx) =>
+      tx.run("MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t:Etf2lTeam) RETURN t", {
+        id,
+      }),
+    );
+
+    const rglTeamsOut = rglTeamsResRead.records.map((r) => {
+      const t = r.get("t");
+      return {
+        id: neo4j.isInt(t.properties.id)
+          ? (t.properties.id as neo4j.Integer).toNumber()
+          : t.properties.id,
+        name: t.properties.name ?? null,
+      };
+    });
+
+    const etf2lTeamsOut = etf2lTeamsResRead.records.map((r) => {
+      const t = r.get("t");
+      return {
+        id: neo4j.isInt(t.properties.id)
+          ? (t.properties.id as neo4j.Integer).toNumber()
+          : t.properties.id,
+        name: t.properties.name ?? null,
+      };
+    });
+
+    // Fetch first-degree teammates with shared team counts and sort by that count
+    // If page is provided, apply SKIP/LIMIT (25 per page). Default: return all.
+    const limit = 25;
+    const usePagination = typeof page === "number" && page >= 0;
+    const skip = usePagination ? neo4j.int(page * limit) : undefined;
+
+    const cypher = usePagination
+      ? `MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t)<-[:MEMBER_OF]-(mate:Player)
+         WHERE mate.id <> $id
+         WITH mate, count(DISTINCT t) AS sharedCount
+         ORDER BY sharedCount DESC
+         SKIP $skip
+         LIMIT $limit
+         RETURN mate`
+      : `MATCH (p:Player {id:$id})-[:MEMBER_OF]->(t)<-[:MEMBER_OF]-(mate:Player)
+         WHERE mate.id <> $id
+         WITH mate, count(DISTINCT t) AS sharedCount
+         ORDER BY sharedCount DESC
+         RETURN mate`;
+
+    const params: any = { id };
+    if (usePagination) params.skip = skip;
+    if (usePagination) params.limit = neo4j.int(limit);
+
+    const teammatesRes = await this.session.executeRead((tx) =>
+      tx.run(cypher, params),
+    );
+
+    const teammatesOut = teammatesRes.records.map((r) => {
+      const mate = r.get("mate");
+      return {
+        id: mate.properties.id,
+        rglName: mate.properties.rglName ?? null,
+        etf2lName: mate.properties.etf2lName ?? null,
+        lastUpdated: mate.properties.lastUpdated ?? null,
+        avatarUrl: mate.properties.avatarUrl ?? null,
+      };
+    });
+
+    return {
+      player: playerOut,
+      teams: { rgl: rglTeamsOut, etf2l: etf2lTeamsOut },
+      teammates: teammatesOut,
+    };
+  }
+
   async searchPlayersByAlias(
     alias: string,
     limit: number = 25,

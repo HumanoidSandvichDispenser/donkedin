@@ -9,7 +9,9 @@ export function createStrictRepositoryMock(): Repository {
     player: {
       needsFetch: vi.fn().mockResolvedValue(true),
       getPlayerWithTeamsById: rejecter("player.getPlayerWithTeamsById"),
+      getPlayerDetailsById: rejecter("player.getPlayerDetailsById"),
       searchPlayersByAlias: rejecter("player.searchPlayersByAlias"),
+      findPathBetweenPlayers: rejecter("player.findPathBetweenPlayers"),
       upsertPlayerProfile: rejecter("player.upsertPlayerProfile"),
     },
 
@@ -24,6 +26,11 @@ export function createStrictRepositoryMock(): Repository {
         getTeamWithPlayersById: rejecter("team.etf2l.getTeamWithPlayersById"),
         upsertTeamProfile: rejecter("team.etf2l.upsertTeamProfile"),
       },
+    },
+
+    rglSeason: {
+      getSeason: rejecter("rglSeason.getSeason"),
+      putSeason: rejecter("rglSeason.putSeason"),
     },
   };
 }

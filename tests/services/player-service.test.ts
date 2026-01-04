@@ -37,7 +37,9 @@ describe("player-service", () => {
     await svc.fetchPlayer("76561198248436608");
 
     expect(repo.player.needsFetch).toHaveBeenCalledWith("76561198248436608");
-    expect(rglService.fetchRglPlayerFromApi).toHaveBeenCalledWith("76561198248436608");
+    expect(rglService.fetchRglPlayerFromApi).toHaveBeenCalledWith(
+      "76561198248436608",
+    );
     expect(etf2lService.fetchEtf2lPlayerFromApi).toHaveBeenCalledWith(
       "76561198248436608",
     );
@@ -96,4 +98,47 @@ describe("player-service", () => {
       undefined,
     );
   });
+});
+
+it("returns player details via repository", async () => {
+  const repo = createStrictRepositoryMock();
+  const expected = {
+    player: {
+      id: "7656",
+      rglName: "a",
+      etf2lName: null,
+      lastUpdated: null,
+      avatarUrl: null,
+    },
+    teams: { rgl: [{ id: 1, name: "T1" }], etf2l: [] },
+    teammates: [
+      {
+        id: "7657",
+        rglName: "Mate",
+        etf2lName: null,
+        lastUpdated: null,
+        avatarUrl: null,
+      },
+    ],
+  };
+  repo.player.getPlayerDetailsById = vi.fn().mockResolvedValue(expected);
+  repo.player.needsFetch = vi.fn().mockResolvedValue(false);
+
+  const rglService: any = { fetchRglPlayerFromApi: vi.fn() };
+  const etf2lService: any = { fetchEtf2lPlayerFromApi: vi.fn() };
+
+  const svc = new PlayerService(rglService, etf2lService, repo as any);
+  const res = await svc.getPlayerDetails("7656");
+
+  expect(repo.player.getPlayerDetailsById).toHaveBeenCalledWith(
+    "7656",
+    undefined,
+  );
+  expect(res).toBe(expected);
+
+  // also test pagination value is passed through
+  repo.player.getPlayerDetailsById = vi.fn().mockResolvedValue(expected);
+  const res2 = await svc.getPlayerDetails("7656", 2);
+  expect(repo.player.getPlayerDetailsById).toHaveBeenCalledWith("7656", 2);
+  expect(res2).toBe(expected);
 });

@@ -27,6 +27,19 @@ export interface PlayerRepository {
 
   getPlayerWithTeamsById(id: string): Promise<PlayerWithTeams | null>;
 
+  /**
+   * Returns a detailed player summary including the player node, teams and
+   * first-degree teammates (players who shared a team with this player).
+   */
+  getPlayerDetailsById(
+    id: string,
+    page?: number | undefined,
+  ): Promise<{
+    player: PlayerNode;
+    teams: { rgl: TeamSummary[]; etf2l: TeamSummary[] };
+    teammates: PlayerNode[];
+  } | null>;
+
   searchPlayersByAlias(alias: string, limit?: number): Promise<PlayerNode[]>;
 
   findPathBetweenPlayers(

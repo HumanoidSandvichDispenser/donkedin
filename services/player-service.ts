@@ -62,4 +62,12 @@ export default class PlayerService {
       );
     }
   }
+
+  /**
+   * Returns a detailed player summary including player, teams and teammates.
+   */
+  async getPlayerDetails(id: string, page?: number) {
+    await this.fetchPlayer(id);
+    return this.repository.player.getPlayerDetailsById(id, page);
+  }
 }
