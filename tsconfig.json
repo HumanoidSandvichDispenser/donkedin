@@ -20,8 +20,6 @@
       "~~/*": "*",
       "~/*": "app/*"
     },
-    "types": [
-      "neo4j.Driver"
-    ]
+    "types": ["neo4j.Driver"]
   }
 }

@@ -40,9 +40,7 @@ export function convertNeo4jValue(v: any): any {
 
 export function serializeNode(node: any) {
   return {
-    id: neo4j.isInt(node.identity)
-      ? node.identity.toNumber()
-      : node.identity,
+    id: neo4j.isInt(node.identity) ? node.identity.toNumber() : node.identity,
     labels: node.labels,
     properties: convertNeo4jValue(node.properties ?? {}),
   };
@@ -57,4 +55,3 @@ export function serializeRelationship(rel: any) {
     properties: convertNeo4jValue(rel.properties ?? {}),
   };
 }
-

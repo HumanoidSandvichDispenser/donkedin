@@ -7,7 +7,7 @@ const mockClient = Object.assign(new RglClient(), {
   profile: {
     getV0Profile: vi.fn(),
     getV0ProfileTeams: vi.fn(),
-  }
+  },
 });
 
 let client = mockClient;

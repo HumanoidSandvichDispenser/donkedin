@@ -1,6 +1,6 @@
 <template>
   <div class="outer-container">
-    <div class="line"/>
+    <div class="line" />
     <div class="inner-container">
       <div class="team-card subtle">
         <div class="league muted-text">
@@ -21,7 +21,7 @@
           </span>
           <span v-if="team?.tag" class="tag-name"> ({{ team?.tag }}) </span>
         </div>
-        <div v-if="team?.divisionName"/>
+        <div v-if="team?.divisionName" />
       </div>
     </div>
   </div>

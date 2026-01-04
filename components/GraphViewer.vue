@@ -1,6 +1,6 @@
 <template>
   <div class="graph-viewer">
-    <div ref="container" class="graph-container"/>
+    <div ref="container" class="graph-container" />
 
     <div class="floating-controls">
       <button class="btn" title="Add player" @click="openAddModal">＋</button>

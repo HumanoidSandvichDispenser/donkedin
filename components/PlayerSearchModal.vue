@@ -139,7 +139,7 @@ async function doSearch() {
       params: {
         q: query.value,
         limit: 25,
-      }
+      },
     });
     results.value = response.players;
   } catch (err: any) {
