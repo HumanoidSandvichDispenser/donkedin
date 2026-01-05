@@ -16,6 +16,7 @@
             v-model="searchQuery"
             class="search-input"
             placeholder="Search players..."
+            @keyup.enter="onNavSearchSubmit"
           >
         </div>
       </div>
@@ -32,8 +33,19 @@
 import { watch, ref } from "vue";
 import { useGraphStore } from "@/stores/graph";
 
+import { useRouter } from "#imports";
+
 const graph = useGraphStore();
 const searchQuery = ref("");
+const router = useRouter();
+
+function onNavSearchSubmit() {
+  if (!searchQuery.value) return;
+  router
+    .push({ path: "/search", query: { q: searchQuery.value } })
+    .catch(() => {});
+  searchQuery.value = "";
+}
 
 // watch pathInfo so other parts of the app can react when a path is loaded
 watch(
@@ -93,7 +105,7 @@ watch(
   --rgl: var(--mr-orange);
   --etf2l: var(--mr-blue);
 
-  --rgl-newcomer: var(--mr-orange);
+  --rgl-newcomer: var(--mr-red);
   --rgl-amateur: var(--mr-yellow);
   --rgl-intermediate: var(--mr-green);
   --rgl-main: var(--mr-blue);
