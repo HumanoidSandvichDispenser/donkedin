@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import { ref, onMounted, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import type { PlayerNode } from "~~/repositories/types";
 import TeammateList from "~~/components/TeammateList.vue";
 import TeamTable from "~~/components/TeamTable.vue";
@@ -50,33 +50,49 @@ import TeamTable from "~~/components/TeamTable.vue";
 const route = useRoute();
 const id = String(route.params.id || "");
 
-const player = ref<PlayerNode | null>(null);
+const {
+  data: playerData,
+  pending,
+  error,
+} = await useFetch(`/api/players/id/${id}`);
 
-const found = ref(false);
-const loaded = ref(false);
+const player = ref<PlayerNode | null>(playerData.value?.player ?? null);
+const found = ref<boolean>(Boolean(player.value));
+const loaded = ref<boolean>(!pending.value && !error.value);
 
 const displayName = computed(() => {
-  if (!player.value) return "Player";
-  return player.value.rglName || player.value.etf2lName || player.value.id;
+  if (!player.value) {
+    return "Player";
+  }
+  return player.value.rglName ?? player.value.etf2lName ?? player.value.id;
 });
 
-onMounted(async () => {
-  loaded.value = false;
-  try {
-    const playerRes = await $fetch(`/api/players/id/${id}`);
-    if (!playerRes) {
-      found.value = false;
-    } else {
-      found.value = true;
-      player.value = playerRes.player ?? null;
-    }
-  } catch (err) {
-    console.error(err);
-    found.value = false;
-  } finally {
-    loaded.value = true;
-  }
-});
+// Keep reactive updates in case of client-side navigation
+if (import.meta.client) {
+  watch(
+    () => route.params.id,
+    async (newId) => {
+      const sid = String(newId || "");
+      if (!sid) return;
+      try {
+        loaded.value = false;
+        const playerRes = await $fetch(`/api/players/id/${sid}`);
+        if (!playerRes) {
+          found.value = false;
+          player.value = null;
+        } else {
+          found.value = true;
+          player.value = playerRes.player ?? null;
+        }
+      } catch (err) {
+        console.error(err);
+        found.value = false;
+      } finally {
+        loaded.value = true;
+      }
+    },
+  );
+}
 </script>
 
 <style scoped>

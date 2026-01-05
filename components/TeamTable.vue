@@ -69,6 +69,28 @@ const props = defineProps<{ playerId: string }>();
 const teams = ref<TeamRow[]>([]);
 const loading = ref(false);
 
+const { data } = await useFetch(`/api/players/id/${props.playerId}/teams`);
+const teamData = data.value;
+
+const rgl = teamData.teams.rgl.map((t) => ({
+  league: "rgl" as const,
+  id: t.id,
+  tag: t.tag,
+  name: t.name,
+  seasonName: t.seasonName,
+  divisionName: t.divisionName,
+}));
+
+const etf2l = teamData.teams.etf2l.map((t) => ({
+  league: "etf2l" as const,
+  id: t.id,
+  tag: t.tag,
+  name: t.name,
+  seasonName: t.seasonName,
+}));
+
+teams.value = [...rgl, ...etf2l].sort((a, b) => a.id - b.id);
+
 function divisionColor(name?: string | null) {
   if (!name) {
     return "var(--text)";
@@ -128,16 +150,21 @@ async function fetchTeams() {
   }
 }
 
-onMounted(() => {
-  if (props.playerId) fetchTeams();
-});
+// Client-only: ensure updates on navigation and hydration mismatches
+if (import.meta.client) {
+  onMounted(() => {
+    if (!teams.value || teams.value.length === 0) {
+      if (props.playerId) fetchTeams();
+    }
+  });
 
-watch(
-  () => props.playerId,
-  (newId, oldId) => {
-    if (newId && newId !== oldId) fetchTeams();
-  },
-);
+  watch(
+    () => props.playerId,
+    (newId, oldId) => {
+      if (newId && newId !== oldId) fetchTeams();
+    },
+  );
+}
 </script>
 
 <style scoped>

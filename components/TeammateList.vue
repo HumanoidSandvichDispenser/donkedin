@@ -53,6 +53,13 @@ const page = ref(props.initialPage ?? 0);
 const loading = ref(false);
 const pageCount = ref(1);
 
+const { data } = await useFetch(`/api/players/id/${props.playerId}/teammates`, {
+  params: { page: page.value, limit: props.limit ?? 25 },
+});
+
+teammates.value = data.value?.teammates ?? [];
+pageCount.value = data.value?.pageCount ?? 0;
+
 async function fetchPage(p: number) {
   loading.value = true;
   try {
@@ -84,17 +91,23 @@ function nextPage() {
   }
 }
 
-onMounted(() => {
-  fetchPage(page.value || 0);
-});
+// Only fetch onMounted on client for subsequent navigation; initial data already populated from SSR
+if (import.meta.client) {
+  onMounted(() => {
+    // ensure client has same initial page if hydration mismatch
+    if (!teammates.value || teammates.value.length === 0) {
+      fetchPage(page.value || 0);
+    }
+  });
 
-watch(
-  () => props.playerId,
-  () => {
-    page.value = 0;
-    fetchPage(0);
-  },
-);
+  watch(
+    () => props.playerId,
+    () => {
+      page.value = 0;
+      fetchPage(0);
+    },
+  );
+}
 </script>
 
 <style scoped>
