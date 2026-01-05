@@ -1,15 +1,39 @@
 <template>
-  <main class="app-root">
-    <NuxtRouteAnnouncer />
-    <NuxtPage />
-  </main>
+  <div>
+    <header class="topbar">
+      <div class="topbar-container">
+        <div class="topbar-left">
+          <nuxt-link to="/" class="logo">Donkedin</nuxt-link>
+          <nav class="nav-links">
+            <nuxt-link to="/" exact-active-class="active">Home</nuxt-link>
+            <nuxt-link to="/network-graph" exact-active-class="active"
+              >Network Graph</nuxt-link
+            >
+          </nav>
+        </div>
+        <div class="topbar-right">
+          <input
+            v-model="searchQuery"
+            class="search-input"
+            placeholder="Search players..."
+          >
+        </div>
+      </div>
+    </header>
+
+    <main class="app-root">
+      <NuxtRouteAnnouncer />
+      <NuxtPage />
+    </main>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { watch } from "vue";
+import { watch, ref } from "vue";
 import { useGraphStore } from "@/stores/graph";
 
 const graph = useGraphStore();
+const searchQuery = ref("");
 
 // watch pathInfo so other parts of the app can react when a path is loaded
 watch(
@@ -84,6 +108,60 @@ body {
   background-color: var(--surface-0);
   color: var(--text);
   margin: 0;
+}
+
+.topbar {
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--muted);
+}
+
+.topbar-container {
+  margin: 0 192px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-links a {
+  color: var(--subtext);
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.nav-links a.active {
+  color: var(--accent);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  min-width: 260px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--surface-0);
+  color: var(--text);
 }
 
 .app-root {
@@ -213,6 +291,7 @@ select:focus {
   color: var(--muted-text);
 }
 
+/* Muted text */
 .muted-text {
   color: var(--muted-text);
 }
