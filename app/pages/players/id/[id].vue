@@ -4,26 +4,11 @@
     <div v-else-if="!found" class="not-found">Player not found</div>
     <div v-else class="content">
       <div class="left">
-        <div class="profile-wrap">
-          <div class="profile">
-            <img
-              v-if="player?.avatarUrl"
-              :src="player?.avatarUrl"
-              alt="avatar"
-              class="avatar"
-            >
-            <div class="meta">
-              <div class="name-row">
-                <h1 class="title">{{ displayName }}</h1>
-                <div class="subtext">
-                  RGL: {{ player?.rglName ?? "not found" }} &middot; ETF2L:
-                  {{ player?.etf2lName ?? "not found" }} &middot; SteamID64:
-                  {{ player?.id ?? "not found" }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProfileCard
+          :player="player"
+          :interactive="true"
+          :name-linkable="false"
+        />
 
         <div class="teams-section">
           <TeamTable :player-id="id" />
@@ -41,10 +26,11 @@
 
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import { ref, computed, watch } from "vue";
+import { ref, watch } from "vue";
 import type { PlayerNode } from "~~/repositories/types";
 import TeammateList from "~~/components/TeammateList.vue";
 import TeamTable from "~~/components/TeamTable.vue";
+import ProfileCard from "~~/components/ProfileCard.vue";
 
 const route = useRoute();
 const id = String(route.params.id || "");
@@ -58,13 +44,6 @@ const {
 const player = ref<PlayerNode | null>(playerData.value?.player ?? null);
 const found = ref<boolean>(Boolean(player.value));
 const loaded = ref<boolean>(!pending.value && !error.value);
-
-const displayName = computed(() => {
-  if (!player.value) {
-    return "Player";
-  }
-  return player.value.rglName ?? player.value.etf2lName ?? player.value.id;
-});
 
 // Keep reactive updates in case of client-side navigation
 if (import.meta.client) {
