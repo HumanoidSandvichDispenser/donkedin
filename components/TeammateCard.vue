@@ -29,9 +29,10 @@
     </div>
     <div class="card-content">
       <div class="name">
-        {{
-          person?.rglName ?? person?.etf2lName ?? person?.id ?? placeholderText
-        }}
+        <NuxtLink v-if="person" :to="`/players/id/${person.id}`">
+          {{ displayName }}
+        </NuxtLink>
+        <span v-else>{{ placeholderText }}</span>
       </div>
       <div v-if="person" class="aliases">
         <span class="alias steam">
@@ -65,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   person?: {
     id: string;
     name: string;
@@ -75,6 +76,10 @@ defineProps<{
   };
   placeholderText?: string;
 }>();
+
+const displayName = computed(() => {
+  return props.person?.rglName ?? props.person?.etf2lName ?? props.person?.id;
+});
 </script>
 
 <style scoped>
