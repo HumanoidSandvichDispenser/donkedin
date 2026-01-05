@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const rawSearch = typeof query.q === "string" ? query.q.trim() : "";
 
   if (!rawSearch) {
-    return createError({
+    createError({
       statusCode: 400,
       statusMessage: "Missing search query",
     });
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     if (!isNaN(parsedLimit) && parsedLimit > 0) {
       limit = Math.min(parsedLimit, 50);
     } else {
-      return createError({
+      createError({
         statusCode: 400,
         statusMessage: "Invalid limit",
       });
@@ -32,9 +32,6 @@ export default defineEventHandler(async (event) => {
     const repo = createRepository(session);
     const players = await repo.player.searchPlayersByAlias(rawSearch, limit);
     return { players };
-  } catch (error) {
-    console.error("Error in player search handler:", error);
-    throw createError({ statusCode: 500, statusMessage: "Internal error" });
   } finally {
     await session.close();
   }
