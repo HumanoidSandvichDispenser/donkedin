@@ -88,7 +88,11 @@ const props = withDefaults(
     placeholderText?: string;
     interactive?: boolean;
   }>(),
-  { interactive: true },
+  {
+    person: undefined,
+    placeholderText: undefined,
+    interactive: true,
+  },
 );
 
 const displayName = computed(() => {
