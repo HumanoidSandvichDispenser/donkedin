@@ -17,8 +17,8 @@
   ],
   "compilerOptions": {
     "paths": {
-      "~~/*": "*",
-      "~/*": "app/*"
+      "~~/*": ["*"],
+      "~/*": ["app/*"]
     },
     "types": ["neo4j.Driver"]
   }
