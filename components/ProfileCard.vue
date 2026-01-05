@@ -112,7 +112,7 @@ const displayName = computed(() => {
 
 .title {
   margin: 0;
-  font-size: 28px;
+  font-size: 20px;
   line-height: 1.1;
   font-weight: 600;
 }
