@@ -45,6 +45,7 @@
             <div class="select-actions">
               <button @click="selectPlayer(p.id)">
                 <TeammateCard
+                  :interactive="false"
                   :person="{
                     id: p.id,
                     name: p.rglName ?? p.etf2lName ?? p.id,

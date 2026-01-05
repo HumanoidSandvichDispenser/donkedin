@@ -29,31 +29,41 @@
     </div>
     <div class="card-content">
       <div class="name">
-        <NuxtLink v-if="person" :to="`/players/id/${person.id}`">
-          {{ displayName }}
-        </NuxtLink>
+        <template v-if="person">
+          <NuxtLink v-if="props.interactive" :to="`/players/id/${person.id}`">
+            {{ displayName }}
+          </NuxtLink>
+          <span v-else>{{ displayName }}</span>
+        </template>
         <span v-else>{{ placeholderText }}</span>
       </div>
       <div v-if="person" class="aliases">
-        <span class="alias steam">
-          <a
-            :href="`https://steamcommunity.com/profiles/${person.id}`"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Steam &nearr;
-          </a>
-        </span>
-        <span v-if="person.rglName" class="alias rgl">
-          &middot;
-          <a
-            :href="`https://rgl.gg/Public/PlayerProfile?p=${person.id}`"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            RGL/{{ person.rglName }} &nearr;
-          </a>
-        </span>
+        <template v-if="props.interactive">
+          <span class="alias steam">
+            <a
+              :href="`https://steamcommunity.com/profiles/${person.id}`"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Steam &nearr;
+            </a>
+          </span>
+          <span v-if="person.rglName" class="alias rgl">
+            &middot;
+            <a
+              :href="`https://rgl.gg/Public/PlayerProfile?p=${person.id}`"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              RGL/{{ person.rglName }} &nearr;
+            </a>
+          </span>
+        </template>
+        <template v-else>
+          <span v-if="person.rglName" class="alias rgl">
+            RGL/{{ person.rglName }}
+          </span>
+        </template>
         <span v-if="person.etf2lName" class="alias etf2l">
           &middot; ETF2L/{{ person.etf2lName }}
         </span>
@@ -66,16 +76,20 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
-  person?: {
-    id: string;
-    name: string;
-    rglName?: string;
-    etf2lName?: string;
-    avatarUrl?: string;
-  };
-  placeholderText?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    person?: {
+      id: string;
+      name: string;
+      rglName?: string;
+      etf2lName?: string;
+      avatarUrl?: string;
+    };
+    placeholderText?: string;
+    interactive?: boolean;
+  }>(),
+  { interactive: true },
+);
 
 const displayName = computed(() => {
   return props.person?.rglName ?? props.person?.etf2lName ?? props.person?.id;

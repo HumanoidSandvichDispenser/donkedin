@@ -4,6 +4,7 @@
       <div class="row">
         <button class="btn card-btn" type="button" @click="openSourceModal">
           <TeammateCard
+            :interactive="false"
             :person="sourcePlayer"
             placeholder-text="Select a source player"
           />
@@ -11,6 +12,7 @@
 
         <button class="btn card-btn" type="button" @click="openDestModal">
           <TeammateCard
+            :interactive="false"
             :person="destPlayer"
             placeholder-text="Select a destination player"
           />
