@@ -173,17 +173,21 @@ if (import.meta.client) {
   padding: 16px;
   border-radius: 6px;
 }
+
 .team-table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .team-table th,
 .team-table td {
-  border: 1px solid var(--muted-border);
   padding: 8px;
   text-align: left;
 }
+
 .team-table th {
+  color: var(--subtext);
+  font-weight: 400;
   background: var(--muted-bg);
 }
 </style>

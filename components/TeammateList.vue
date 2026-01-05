@@ -1,6 +1,8 @@
 <template>
   <div class="teammate-list">
     <div class="teammate-wrap">
+      <span class="title">Top teammates</span>
+      <hr >
       <div v-if="loading" class="loading">Loading teammates...</div>
       <div v-else>
         <div v-if="teammates.length === 0" class="empty">
@@ -116,21 +118,35 @@ if (import.meta.client) {
   flex-direction: column;
   gap: 12px;
 }
+
 .teammate-wrap {
   background: var(--surface-0);
   padding: 16px;
   border-radius: 6px;
 }
+
+.title {
+  color: var(--subtext);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--muted);
+  margin: 8px 0;
+}
+
 .list {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
 }
+
 .pagination {
   display: flex;
   gap: 8px;
   align-items: center;
 }
+
 .btn {
   padding: 6px 10px;
   border-radius: 6px;
@@ -138,14 +154,17 @@ if (import.meta.client) {
   background: var(--surface);
   cursor: pointer;
 }
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
 .page-indicator {
   font-size: 14px;
   color: var(--subtext);
 }
+
 .loading,
 .empty {
   color: var(--subtext);

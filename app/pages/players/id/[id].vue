@@ -32,7 +32,6 @@
 
       <aside class="right">
         <div class="teammates-section">
-          <strong>Top teammates</strong>
           <TeammateList :player-id="id" />
         </div>
       </aside>

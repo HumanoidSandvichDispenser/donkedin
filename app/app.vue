@@ -157,9 +157,9 @@ body {
 
 .search-input {
   min-width: 260px;
-  padding: 8px 12px;
+  padding: 0 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--muted);
   background: var(--surface-0);
   color: var(--text);
 }
@@ -272,7 +272,6 @@ textarea:focus,
 select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 6px rgba(135, 192, 149, 0.12);
-  transform: translateY(-1px);
 }
 
 /* subtle focus for keyboard users */
