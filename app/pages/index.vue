@@ -1,26 +1,11 @@
 <template>
-  <div class="page-root">
-    <div class="main">
-      <GraphViewer />
-    </div>
-    <PathSidebar />
-  </div>
+  <div class="home-root"/>
 </template>
 
-<script setup lang="ts">
-import GraphViewer from "@@/components/GraphViewer.vue";
-import PathSidebar from "@@/components/PathSidebar.vue";
-</script>
+<script setup lang="ts"></script>
 
 <style scoped>
-.page-root {
-  display: flex;
-  min-height: 100vh;
-}
-
-.main {
-  flex: 1;
-  padding: 12px;
-  height: 100vh;
+.home-root {
+  padding: 24px;
 }
 </style>
