@@ -22,16 +22,16 @@ through the teams they've played on. Like LinkedIn for TF2!
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | [Nuxt 4](https://nuxt.com) / [Vue 3](https://vuejs.org) |
-| State management | [Pinia](https://pinia.vuejs.org) |
-| Graph visualization | [Cytoscape.js](https://js.cytoscape.org) (fCOSE, Cola) |
-| Backend / API | Nuxt server routes (Nitro) |
-| Graph database | [Neo4j 5](https://neo4j.com) + Graph Data Science plugin |
-| Language | TypeScript |
-| Linting / Formatting | ESLint + Prettier + Husky |
-| Testing | [Vitest](https://vitest.dev) |
+| Layer                | Technology                                               |
+| -------------------- | -------------------------------------------------------- |
+| Frontend             | [Nuxt 4](https://nuxt.com) / [Vue 3](https://vuejs.org)  |
+| State management     | [Pinia](https://pinia.vuejs.org)                         |
+| Graph visualization  | [Cytoscape.js](https://js.cytoscape.org) (fCOSE, Cola)   |
+| Backend / API        | Nuxt server routes (Nitro)                               |
+| Graph database       | [Neo4j 5](https://neo4j.com) + Graph Data Science plugin |
+| Language             | TypeScript                                               |
+| Linting / Formatting | ESLint + Prettier + Husky                                |
+| Testing              | [Vitest](https://vitest.dev)                             |
 
 ## Prerequisites
 
@@ -65,3 +65,13 @@ Start the application with Docker Compose:
 ```bash
 docker compose up
 ```
+
+## Screenshots
+
+### Graph Viewer
+
+![Graph viewer](./docs/graph-viewer.png)
+
+### Profile page
+
+![Profile page](./docs/profile.png)
